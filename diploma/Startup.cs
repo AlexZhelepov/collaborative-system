@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using diploma.Models;
+using diploma.Data.Entities;
 
 namespace diploma
 {
@@ -32,14 +33,22 @@ namespace diploma
                 options.UseNpgsql(
                     Configuration.GetConnectionString("DefaultConnection")));
             
-            // Instead of this...
-            services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
+            //  онфигураци€ механизма авторизации.
+            services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddDefaultUI()
+                .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            // Used that...
-            /*services.AddIdentity<ApplicationUser, IdentityRole<long>>(options => options.SignIn.RequireConfirmedAccount = true)
-                    .AddEntityFrameworkStores<ApplicationDbContext>()
-                    .AddDefaultTokenProviders();*/
+            // Ќемного упрощаем пароль, чтобы не слишком паритьс€ при добавлении нового пользовател€.
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 0;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+            });
 
             services.AddControllersWithViews();
             services.AddRazorPages();

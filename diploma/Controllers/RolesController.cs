@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using diploma.Data.Entities;
 using diploma.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace diploma.Controllers
 {
+    [Authorize(Roles = "admin")]
     public class RolesController : Controller
     {
         RoleManager<IdentityRole> _roleManager;
-        UserManager<IdentityUser> _userManager;
+        UserManager<ApplicationUser> _userManager;
 
-        public RolesController(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
+        public RolesController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
         {
             _roleManager = roleManager;
             _userManager = userManager;
@@ -60,7 +63,7 @@ namespace diploma.Controllers
         public async Task<IActionResult> Edit(string userId)
         {
             // получаем пользователя
-            IdentityUser user = await _userManager.FindByIdAsync(userId);
+            ApplicationUser user = await _userManager.FindByIdAsync(userId);
             if (user != null)
             {
                 // получем список ролей пользователя
@@ -83,7 +86,7 @@ namespace diploma.Controllers
         public async Task<IActionResult> Edit(string userId, List<string> roles)
         {
             // получаем пользователя
-            IdentityUser user = await _userManager.FindByIdAsync(userId);
+            ApplicationUser user = await _userManager.FindByIdAsync(userId);
             if (user != null)
             {
                 // получем список ролей пользователя
