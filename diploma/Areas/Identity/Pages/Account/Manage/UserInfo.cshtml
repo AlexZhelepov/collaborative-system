@@ -1,0 +1,52 @@
+﻿@page
+@model diploma.Areas.Identity.Pages.Account.Manage.UserInfoModel
+@{
+    ViewData["Title"] = "Персонализация аккаунта";
+    ViewData["ActivePage"] = ManageNavPages.UserInfo;
+}
+
+<h4>@ViewData["Title"]</h4>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+<div class="row">
+    <div class="col-md-6">
+        <form id="user-info-form" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Input.FIO"></label>
+                <input asp-for="Input.FIO" class="form-control" />
+                <span asp-validation-for="Input.FIO" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.CareerStart"></label>
+                <input asp-for="Input.CareerStart" class="form-control" />
+                <span asp-validation-for="Input.CareerStart" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.VacationStart"></label>
+                <input asp-for="Input.VacationStart" class="form-control" />
+                <span asp-validation-for="Input.VacationStart" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Avatar"></label>
+                <input asp-for="Input.Avatar" class="form-control" type="file" />
+                <span asp-validation-for="Input.Avatar" class="text-danger"></span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Input.AvatarPath))
+            {
+                <div class="form-group">
+                    <label asp-for="Input.AvatarPath"></label>
+                    <input asp-for="Input.AvatarPath" class="form-control" type="hidden" />
+                    <img src="@("/" + Model.Input.AvatarPath)"/>
+                </div>
+            }
+
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
