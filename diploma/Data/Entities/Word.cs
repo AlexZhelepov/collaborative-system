@@ -30,11 +30,6 @@ namespace diploma.Data.Entities
         public bool HasMeaning { get; set; }
 
         /// <summary>
-        /// Порядок слова в тексте.
-        /// </summary>
-        public int Order { get; set; }
-
-        /// <summary>
         /// Частота встречаемости слова в тексте.
         /// </summary>
         public int Frequency { get; set; }

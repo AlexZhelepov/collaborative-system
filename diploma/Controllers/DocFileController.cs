@@ -13,6 +13,7 @@ using Spire.Doc;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -389,13 +390,28 @@ namespace diploma.Controllers
                     db.SaveChanges();
 
                     // Сохраняем слова, имея id-шник файла.
-                    int order = 0;
+                    int portion = 0;
 
-                    // Слова берутся единожды.
+                    // Слова берутся единожды, считается их частота встречаемости.
+                    words = words.Where(i => i.meaningfull).ToList();
 
+                    // Удаляем странные буквы.
+                    words = words.Where(i => i.text.Length > 1).ToList();
+
+                    // Считаем частотность встречаемсти в тексте.
+                    var frequency = from w in words
+                                    group w by w.analysis[0].lex into grp
+                                    select new { word = grp.Key, frequency = grp.Count() };
+
+                    // делаем distinct.
+                    var distinctWords = (
+                        from f in frequency
+                        join w in words on f.word equals w.analysis[0].lex
+                        select new MystemResult () { text = w.text, analysis = w.analysis, frequency = f.frequency, meaningfull = true }
+                    ).Distinct();
 
                     // Берутся только значимые слова.
-                    foreach (var word in words.Where(i => i.meaningfull))
+                    foreach (var word in distinctWords)
                     {
                         int index = !string.IsNullOrEmpty(word.analysis[0].gr) ? word.analysis[0].gr.IndexOf(",") : -1;
 
@@ -406,17 +422,18 @@ namespace diploma.Controllers
                             InitialForm = word.analysis[0].lex, // берем первый вариант слова.
                             MystemData = JsonConvert.SerializeObject(word),
                             TextVersion = word.text,
-                            Order = order
+                            Frequency = word.frequency
                         };
-                        order++;
 
                         db.Words.Add(w);
 
                         // Сохраняем порциями, чтобы БД не грузить особо.
-                        if (order % 10 == 0)
+                        if (portion % 10 == 0)
                         {
                             db.SaveChanges();
                         }
+
+                        portion++;
                     }
 
                     db.SaveChanges();
@@ -513,11 +530,36 @@ namespace diploma.Controllers
     }
 
     [Serializable]
-    public class MystemResult
+    public class MystemResult: IEquatable<MystemResult>
     {
         public List<Data> analysis { get; set; }
         public string text { get; set; }
-
         public bool meaningfull { get; set; }
+        public int frequency { get; set; }
+
+        // Немного костыльненко, но вроде надежно прибил.
+        public bool Equals([AllowNull] MystemResult other)
+        {
+            if (Object.Equals(this, other))
+            {
+                return true;
+            }
+            else 
+            {
+                if (analysis[0].lex == other.analysis[0].lex)
+                {
+                    return true;
+                }
+                else 
+                {
+                    return false;
+                }
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return analysis[0].lex.GetHashCode();
+        }
     }
 }

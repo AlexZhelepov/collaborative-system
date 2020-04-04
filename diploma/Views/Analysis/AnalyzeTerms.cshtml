@@ -1,0 +1,31 @@
+﻿@model IEnumerable<AnalysisViewModel>
+
+<h2>Анализ файлов</h2>
+
+<table class="table">
+    <tr>
+        <th>Исполнитель</th>
+        <th>Должность</th>
+        <th>Классы и принадлежности (%)</th>
+        <th>Компетенции</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Document.FIO</td>
+            <td>@item.Document.WorkPlace</td>
+            <td>
+                @foreach (var subject in item.SubjectsAccessory)
+                {
+                    <p>@subject.Key — @subject.Value</p>
+                }
+            </td>
+            <td>
+                @foreach (var skill in item.Skills)
+                {
+                    <p>@skill</p>
+                }
+            </td>
+        </tr>
+    }
+</table>

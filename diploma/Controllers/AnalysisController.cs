@@ -4,21 +4,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using diploma.Data;
 using diploma.Data.Entities;
+using diploma.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace diploma.Controllers
 {
     [Authorize(Roles = "file_admin")]
     public class AnalysisController : Controller
     {
-        public IActionResult Index()
+        public IActionResult Index() => View();
+
+        public IActionResult AnalysisList()
         {
             using var db = AppContextFactory.DB;
             var docs = db.DocFiles.ToList();
-
-            // Подготовка данных и рассчет метрик для каждого документа.
 
             // Классы.
             var subjects = (
@@ -35,22 +35,35 @@ namespace diploma.Controllers
                 where f.Code == "skills"
                 select fi
             ).ToList();
-                
-            // Читаем процентное содержание классов.
-            var words = db.Words.Where(i => i.)
 
-            // Выделяем компетенции.
+            var list = new List<AnalysisViewModel>();
+            docs.ForEach(i => { list.Add(CalcDocStats(db, i, subjects, skills)); });
 
-            return View();
+            return View(list);
         }
 
-        private void CalcDocStats(ApplicationDbContext db, DocFile document, List<FacetItem> subjects, List<FacetItem> skills) 
+        private AnalysisViewModel CalcDocStats(ApplicationDbContext db, DocFile document, List<FacetItem> subjects, List<FacetItem> skills)
         {
             var words = db.Words.Where(i => i.DocFileId == document.Id);
 
-            Dictionary<string, int> accessory = new Dictionary<string, int>();
+            // Данные на выход.
+            Dictionary<string, double> subjectsAccessory = new Dictionary<string, double>();
+            List<string> personalSkills = new List<string>();
 
-            
+            var groupedTerms = from w in words
+                               where w.FacetItemId.HasValue
+                               join fi in subjects on w.FacetItemId equals fi.Id
+                               group fi by fi.Name into grp
+                               select new { name = grp.Key, count = grp.Count() };
+
+            subjectsAccessory = groupedTerms.ToDictionary(i => i.name, i => (double)i.count / groupedTerms.Count());
+            personalSkills = (
+                from w in words
+                join fi in skills on w.FacetItemId equals fi.Id
+                select fi.Name
+            ).Distinct().ToList();
+
+            return new AnalysisViewModel() { SubjectsAccessory = subjectsAccessory, Document = document, Skills = personalSkills };
         }
 
         /// <summary>

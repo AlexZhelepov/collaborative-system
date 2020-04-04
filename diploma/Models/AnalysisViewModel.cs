@@ -9,7 +9,7 @@ namespace diploma.Models
     public class AnalysisViewModel
     {
         public DocFile Document { get; set; }
-        public Dictionary<string, double> ClassAccessory { get; set; }
+        public Dictionary<string, double> SubjectsAccessory { get; set; }
         public List<string> Skills { get; set; }
     }
 }
