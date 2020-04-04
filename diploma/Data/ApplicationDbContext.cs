@@ -30,5 +30,9 @@ namespace diploma.Data
         }
 
         public DbSet<UserInfo> UserInfos { get; set; }
+        public DbSet<DocFile> DocFiles { get; set; }
+        public DbSet<Word> Words { get; set; }
+        public DbSet<Facet> Facets { get; set; }
+        public DbSet<FacetItem> FacetItems { get; set; }
     }
 }

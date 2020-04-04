@@ -1,0 +1,79 @@
+﻿@model DocFileDetailsViewModel
+
+<h2>А из чего состоит файл?</h2>
+
+<form asp-action="UpdateWords" asp-route-id="@Model.Document.Id" method="post">
+    <table class="table">
+        <tr>
+            <th>Слово в тексте</th>
+            <th>Начальная форма</th>
+            <th>Принадлежность</th>
+        </tr>
+
+        @foreach (var item in Model.Words)
+        {
+            <tr style="@(!item.Word.HasMeaning ? "background-color: gray" : string.Empty)">
+                <td>@item.Word.TextVersion</td>
+                <td>@item.Word.InitialForm</td>
+                <td>
+                    <!--Данные для формочки-->
+                    <input class="data-word-id" value="@item.Word.Id" type="hidden">
+                    <select class="data-select-list" asp-for="@item.Type" asp-items="@item.Types"></select>
+                </td>
+            </tr>
+        }
+    </table>
+    <button id="save-btn" type="submit" class="btn btn-sm btn-primary">
+        Сохранить
+    </button>
+</form>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(() => {
+            $('#save-btn').on('click', (e) => {
+                e.preventDefault()
+
+                // Собираем данные в кулак.
+                data = []
+
+                $wordIdData = $('.data-word-id')
+                $selectData = $('.data-select-list')
+
+                let ids = []
+                let select = []
+
+                $wordIdData.each((i, v) => {
+                    ids.push($(v).val())
+                })
+
+                $selectData.each((i, v) => {
+                    select.push($(v).val())
+                })
+
+                for (let i = 0; i < select.length; i++) {
+                    if (select[i] != 0) {
+                        data.push({
+                            wordId: ids[i],
+                            selectId: select[i]
+                        })
+                    }
+                }
+
+                // Отправляем их на сервачок, который к моменту сдачи надеюсь еще будет работать, да и вообще хаос не наступит (если не наступит, то бросьте в меня камень) =)
+                fetch('/DocFile/UpdateWords', {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: { 'Content-Type': 'application/json' }
+                }).then((res) => {
+                    console.log(res)
+                    alert(res)
+                }).catch((err) => {
+                    alert('Error');
+                }).finally(() => {
+
+                })
+            })
+        })
+    </script>
+}

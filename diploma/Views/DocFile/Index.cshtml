@@ -1,0 +1,32 @@
+﻿@model IEnumerable<diploma.Data.Entities.DocFile>
+
+<h2>Список загруженных файлов</h2>
+
+<table class="table">
+    <tr>
+        <th>Пользователь</th>
+        <th>Скачать</th>
+        <th>Хеш файла</th>
+        <th colspan="2">Действия</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.ApplicationUserId</td>
+            <td><a href="@("/" + item.FileName)">Скачать</td>
+            <td>@item.FileHash</td>
+            <td><a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@item.Id">Подробнее</a></td>
+            <td>
+                <form asp-action="Delete" asp-route-id="@item.Id" method="post">
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        Удалить
+                    </button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>
+
+<a class="btn btn-sm btn-primary" asp-action="Create">Добавить файл</a>
+
+

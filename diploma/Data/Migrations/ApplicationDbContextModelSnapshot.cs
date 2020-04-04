@@ -213,6 +213,82 @@ namespace diploma.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("diploma.Data.Entities.DocFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FIO")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Skills")
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkPlace")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("DocFiles");
+                });
+
+            modelBuilder.Entity("diploma.Data.Entities.Facet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Facets");
+                });
+
+            modelBuilder.Entity("diploma.Data.Entities.FacetItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("FacetId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FacetId");
+
+                    b.ToTable("FacetItems");
+                });
+
             modelBuilder.Entity("diploma.Data.Entities.UserInfo", b =>
                 {
                     b.Property<int>("Id")
@@ -242,6 +318,46 @@ namespace diploma.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("UserInfos");
+                });
+
+            modelBuilder.Entity("diploma.Data.Entities.Word", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("DocFileId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("FacetItemId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("HasMeaning")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("InitialForm")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MystemData")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TextVersion")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocFileId");
+
+                    b.HasIndex("FacetItemId")
+                        .IsUnique();
+
+                    b.ToTable("Words");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -295,11 +411,42 @@ namespace diploma.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("diploma.Data.Entities.DocFile", b =>
+                {
+                    b.HasOne("diploma.Data.Entities.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("diploma.Data.Entities.FacetItem", b =>
+                {
+                    b.HasOne("diploma.Data.Entities.Facet", "Facet")
+                        .WithMany("FacetItems")
+                        .HasForeignKey("FacetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("diploma.Data.Entities.UserInfo", b =>
                 {
                     b.HasOne("diploma.Data.Entities.ApplicationUser", "User")
                         .WithOne("UserInfo")
                         .HasForeignKey("diploma.Data.Entities.UserInfo", "UserId");
+                });
+
+            modelBuilder.Entity("diploma.Data.Entities.Word", b =>
+                {
+                    b.HasOne("diploma.Data.Entities.DocFile", "DocFile")
+                        .WithMany("Words")
+                        .HasForeignKey("DocFileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("diploma.Data.Entities.FacetItem", "FacetItem")
+                        .WithOne("Word")
+                        .HasForeignKey("diploma.Data.Entities.Word", "FacetItemId");
                 });
 #pragma warning restore 612, 618
         }
