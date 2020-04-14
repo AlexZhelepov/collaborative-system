@@ -120,7 +120,7 @@ namespace diploma.Controllers
         {
             using var db = AppContextFactory.DB;
             var doc = db.DocFiles.First(i => i.Id == id);
-            var words = db.Words.Where(i => i.DocFileId == id && i.HasMeaning).ToList();
+            var words = db.Words.Where(i => i.DocFileId == id).ToList();
 
             var model = new DocFileDetailsViewModel() { Document = doc, Words = new List<DocFileDetailsItem>() };
 
@@ -129,7 +129,7 @@ namespace diploma.Controllers
                 var selectedList = new List<SelectListItem>() { new SelectListItem() { Value = "0", Text = "[Выберите отношение]" } };
                 selectedList.AddRange(
                     from f in db.Facets
-                    where new string[] { "skills", "subject" }.Contains(f.Code)
+                    where new string[] { "skills", "subjects" }.Contains(f.Code)
                     join fi in db.FacetItems on f.Id equals fi.Facet.Id
                     select new SelectListItem() { Text = fi.Name, Value = fi.Id.ToString() }
                 );
@@ -143,7 +143,7 @@ namespace diploma.Controllers
                 model.Words.Add(new DocFileDetailsItem() { Word = item, Types = selectedList });
             }
 
-            model.Words = model.Words.OrderBy(i => i.Word.HasMeaning).ToList();
+            model.Words = model.Words.OrderByDescending(i => i.Word.HasMeaning).ToList();
 
             return View(model);
         }

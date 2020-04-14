@@ -1,0 +1,48 @@
+﻿@model UserEditViewModel
+
+<h2>Пользователь</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form id="user-info-form" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="@Model.FIO"></label>
+                <input asp-for="@Model.FIO" class="form-control" />
+                <span asp-validation-for="@Model.FIO" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.CareerStart"></label>
+                <input asp-for="@Model.CareerStart" class="form-control" />
+                <span asp-validation-for="@Model.CareerStart" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.VacationStart"></label>
+                <input asp-for="@Model.VacationStart" class="form-control" />
+                <span asp-validation-for="@Model.VacationStart" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.Avatar"></label>
+                <input asp-for="@Model.Avatar" class="form-control" type="file" />
+                <span asp-validation-for="@Model.Avatar" class="text-danger"></span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.AvatarPath))
+            {
+                <div class="form-group">
+                    <label asp-for="@Model.AvatarPath"></label>
+                    <input asp-for="@Model.AvatarPath" class="form-control" type="hidden" />
+                    <img style="max-height: 40px" src="@("/" + Model.AvatarPath)" />
+                </div>
+            }
+
+            <div class="form-group">
+                <label asp-for="@Model.ApplicationUserId"></label>
+                <select class="data-select-list" asp-for="@Model.ApplicationUserId" asp-items="@Model.Bindings"></select>
+                <span asp-validation-for="@Model.ApplicationUserId" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>

@@ -14,7 +14,7 @@ namespace diploma.Data.Migrations
                 List<Facet> facets = new List<Facet>()
                 {
                     new Facet() { Name = "Компетенции", Code = "skills" },
-                    new Facet() { Name = "Предметные области", Code = "subject" }
+                    new Facet() { Name = "Предметные области", Code = "subjects" }
                 };
 
                 foreach (var item in facets)
@@ -25,7 +25,7 @@ namespace diploma.Data.Migrations
                 db.SaveChanges();
 
                 var skillsFacet = facets.FirstOrDefault(i => i.Code == "skills");
-                var subjectsFacet = facets.FirstOrDefault(i => i.Code == "subject");
+                var subjectsFacet = facets.FirstOrDefault(i => i.Code == "subjects");
 
                 List<FacetItem> facetItems = new List<FacetItem>()
                     {
@@ -159,7 +159,7 @@ namespace diploma.Data.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            // нужно всегда писать тут обратку, но не сегодня =)
         }
     }
 }

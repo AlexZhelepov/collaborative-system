@@ -37,72 +37,48 @@ namespace diploma.Controllers
             ).ToList();
 
             var list = new List<AnalysisViewModel>();
-            docs.ForEach(i => { list.Add(CalcDocStats(db, i, subjects, skills)); });
+            docs.ForEach(i => { list.Add(AnalysisHelper.CalcDocStats(db, i, subjects, skills)); });
 
             return View(list);
         }
 
-        private AnalysisViewModel CalcDocStats(ApplicationDbContext db, DocFile document, List<FacetItem> subjects, List<FacetItem> skills)
-        {
-            var words = db.Words.Where(i => i.DocFileId == document.Id);
-
-            // Данные на выход.
-            Dictionary<string, double> subjectsAccessory = new Dictionary<string, double>();
-            List<string> personalSkills = new List<string>();
-
-            var groupedTerms = from w in words
-                               where w.FacetItemId.HasValue
-                               join fi in subjects on w.FacetItemId equals fi.Id
-                               group fi by fi.Name into grp
-                               select new { name = grp.Key, count = grp.Count() };
-
-            subjectsAccessory = groupedTerms.ToDictionary(i => i.name, i => (double)i.count / groupedTerms.Count());
-            personalSkills = (
-                from w in words
-                join fi in skills on w.FacetItemId equals fi.Id
-                select fi.Name
-            ).Distinct().ToList();
-
-            return new AnalysisViewModel() { SubjectsAccessory = subjectsAccessory, Document = document, Skills = personalSkills };
-        }
 
         /// <summary>
-        /// Значимость терминов, прогоняется по всем текстам.
+        /// Значимость терминов, прогоняется по всем загруженным текстам.
         /// </summary>
         public async Task<IActionResult> AnalyzeTerms()
         {
             using var db = AppContextFactory.DB;
-
-            // Если слово встречается во всех документах, то оно не является значимым.
-            // Обновляем пометку у такого слова.
-
-            // Документы.
-            var docsCount = db.DocFiles.Count();
-
-            // Группируем слова по документам: слово - количество документов в которых встречается.
-            var groupedWords = (
-                from w in db.Words
-                group w by new { w.InitialForm, w.DocFileId } into grp
-                select new { word = grp.Key, count = grp.Count() }
-            ).ToList();
-
-            var groupedByDocs = (
-                from w in groupedWords
-                group w by w.word.InitialForm into grp
-                select new { word = grp.Key, filesIn = grp.Count() }
-            ).ToList();
-
-            // Теперь готовим слова по мере их "значимости" для текста.
-            var notTermsAnyMore = groupedByDocs.Where(i => i.filesIn == docsCount).Select(i => i.word).ToArray();
-
-            // Сбрасываем значимость у всех слов, переназначаем ее на новые слова.
-            int portion = 0;
-
             using var t = db.Database.BeginTransaction();
 
             try
             {
-                foreach (var w in db.Words)
+                // Если слово встречается во всех документах, то оно не является значимым.
+                // Обновляем пометку у такого слова.
+
+                // Документы.
+                var docsCount = db.DocFiles.Count();
+
+                // Группируем слова по документам: слово - количество документов в которых встречается.
+                var groupedWords = (
+                    from w in db.Words
+                    group w by new { w.InitialForm, w.DocFileId } into grp
+                    select new { word = grp.Key, count = grp.Count() }
+                ).ToList();
+
+                var groupedByDocs = (
+                    from w in groupedWords
+                    group w by w.word.InitialForm into grp
+                    select new { word = grp.Key, filesIn = grp.Count() }
+                ).ToList();
+
+                // Теперь готовим слова по мере их "значимости" для текста.
+                var notTermsAnyMore = groupedByDocs.Where(i => i.filesIn == docsCount).Select(i => i.word).ToArray();
+
+                // Сбрасываем значимость у всех слов, переназначаем ее на новые слова.
+                int portion = 0;
+
+                foreach (var w in db.Words.ToList())
                 {
                     if (w.HasMeaning)
                     {
@@ -121,23 +97,58 @@ namespace diploma.Controllers
 
                     if (portion % 20 == 0)
                     {
-                        await db.SaveChangesAsync();
+                        db.SaveChanges();
                     }
 
                     portion++;
                 }
 
-                await db.SaveChangesAsync();
+                db.SaveChanges();
                 await t.CommitAsync();
             }
             catch (Exception ex)
             {
                 await t.RollbackAsync();
-                ModelState.AddModelError("Error", "Возникла ошибка при обновлении значимости терминов в файлах");
-                return View();
+                ModelState.AddModelError("Error", "Возникла ошибка при обновлении значимости терминов в файлах! " + ex.Message);
+                return RedirectToAction("Index");
             }
 
-            return View();
+            return RedirectToAction("Index");
+        }
+    }
+
+    public static class AnalysisHelper
+    {
+        public static AnalysisViewModel CalcDocStats(ApplicationDbContext db, DocFile document, List<FacetItem> subjects, List<FacetItem> skills)
+        {
+            var words = db.Words.Where(i => i.DocFileId == document.Id);
+
+            // Данные на выход.
+            Dictionary<string, double> subjectsAccessory = new Dictionary<string, double>();
+            List<string> personalSkills = new List<string>();
+
+            // TODO.
+            var groupedTerms = (from w in db.Words
+                                where w.FacetItemId.HasValue && w.DocFileId == document.Id
+                                join fi in subjects on w.FacetItemId.Value equals fi.Id
+                                group fi by fi.Name into grp
+                                select new { name = grp.Key, count = grp.Count() }).ToList();
+
+            //var items = Context.Assets.AsEnumerable().GroupBy(p => p.CategoryName).Select(p => new AssetCategorySummary
+            //{
+            //    CategoryId = p.Select(r => r.CategoryId).FirstOrDefault(),
+            //    CategoryName = p.Select(r => r.CategoryName).FirstOrDefault(),
+            //    TotalAsset = p.Count()
+            //}).ToList();
+
+            subjectsAccessory = groupedTerms.ToDictionary(i => i.name, i => (double)i.count / groupedTerms.Count);
+            personalSkills = (
+                from w in words
+                join fi in skills on w.FacetItemId equals fi.Id
+                select fi.Name
+            ).Distinct().ToList();
+
+            return new AnalysisViewModel() { SubjectsAccessory = subjectsAccessory, Document = document, Skills = personalSkills };
         }
     }
 }

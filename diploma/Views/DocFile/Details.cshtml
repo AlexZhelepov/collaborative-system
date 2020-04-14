@@ -12,7 +12,7 @@
 
         @foreach (var item in Model.Words)
         {
-            <tr style="@(!item.Word.HasMeaning ? "background-color: gray" : string.Empty)">
+            <tr style="@(!item.Word.HasMeaning ? "background-color: lightgray" : string.Empty)">
                 <td>@item.Word.TextVersion</td>
                 <td>@item.Word.InitialForm</td>
                 <td>

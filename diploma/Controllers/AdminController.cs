@@ -14,15 +14,5 @@ namespace diploma.Controllers
         {
             return View();
         }
-
-        public void UsersList()
-        {
-
-        }
-
-        public void ProjectsList()
-        {
-
-        }
     }
 }

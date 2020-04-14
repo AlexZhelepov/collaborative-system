@@ -1,0 +1,38 @@
+﻿@model ProjectDetailsViewModel
+
+<h2>Вакансии проекта</h2>
+
+<table class="table">
+    <tr>
+        <th>Наименование</th>
+        <th>Кем занята</th>
+        <th>Свойства вакансии</th>
+        <th colspan="2">Действия</th>
+    </tr>
+    @foreach (var item in Model.Vacancies)
+    {
+        <tr>
+            <td>@item.Vacancy.Name</td>
+            <td>@item.Applicant.Name</td>
+            <td>
+                @foreach (var c in item.Competences)
+                {
+                    <span>@(c.Category) ♥♦♣♠ @(c.Name) ♥♦♣♠ @(c.Level) </span><br/>
+                }
+            </td>
+            <td>
+                <a class="btn btn-sm btn-primary" asp-controller="Project" asp-action="VacancyEdit" asp-route-id="@item.Vacancy.Id" asp-route-projectid="@Model.ProjectId">Редактировать</a>
+            </td>
+            <td>
+                <form asp-controller="Project" asp-action="VacancyDelete" asp-route-id="@item.Vacancy.Id" method="post">
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        Удалить
+                    </button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>
+
+<a class="btn btn-sm btn-primary" asp-controller="Project" asp-route-projectid="@Model.ProjectId" asp-action="VacancyEdit">Добавить вакансию</a>
+

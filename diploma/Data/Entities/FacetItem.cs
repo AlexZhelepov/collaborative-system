@@ -12,7 +12,11 @@ namespace diploma.Data.Entities
         
         [Required]
         public string Name { get; set; }
+
+        public double? Value { get; set; } 
  
+        public int FacetId { get; set; }
+
         [Required]
         public Facet Facet { get; set; }
         public virtual Word Word { get; set; }

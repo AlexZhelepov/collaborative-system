@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using diploma.Data;
@@ -9,9 +10,10 @@ using diploma.Data;
 namespace diploma.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200407070738_BigUpdateForMarina")]
+    partial class BigUpdateForMarina
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -292,32 +294,6 @@ namespace diploma.Data.Migrations
                     b.ToTable("FacetItems");
                 });
 
-            modelBuilder.Entity("diploma.Data.Entities.Project", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<DateTime?>("DateEnd")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime>("DateStart")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Projects");
-                });
-
             modelBuilder.Entity("diploma.Data.Entities.UserCompetence", b =>
                 {
                     b.Property<int>("Id")
@@ -342,7 +318,7 @@ namespace diploma.Data.Migrations
 
                     b.HasIndex("UserInfoId");
 
-                    b.ToTable("UserCompetences");
+                    b.ToTable("UserCompetence");
                 });
 
             modelBuilder.Entity("diploma.Data.Entities.UserInfo", b =>
@@ -374,59 +350,6 @@ namespace diploma.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("UserInfos");
-                });
-
-            modelBuilder.Entity("diploma.Data.Entities.Vacancy", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("UserInfoId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("UserInfoId");
-
-                    b.ToTable("Vacancies");
-                });
-
-            modelBuilder.Entity("diploma.Data.Entities.VacancyCompetence", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<int>("CompetenceId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("LevelId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("VacancyId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CompetenceId");
-
-                    b.HasIndex("LevelId");
-
-                    b.HasIndex("VacancyId");
-
-                    b.ToTable("VacancyCompetences");
                 });
 
             modelBuilder.Entity("diploma.Data.Entities.Word", b =>
@@ -564,40 +487,6 @@ namespace diploma.Data.Migrations
                     b.HasOne("diploma.Data.Entities.ApplicationUser", "User")
                         .WithOne("UserInfo")
                         .HasForeignKey("diploma.Data.Entities.UserInfo", "UserId");
-                });
-
-            modelBuilder.Entity("diploma.Data.Entities.Vacancy", b =>
-                {
-                    b.HasOne("diploma.Data.Entities.Project", "Project")
-                        .WithMany("Vacancies")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("diploma.Data.Entities.UserInfo", "UserInfo")
-                        .WithMany()
-                        .HasForeignKey("UserInfoId");
-                });
-
-            modelBuilder.Entity("diploma.Data.Entities.VacancyCompetence", b =>
-                {
-                    b.HasOne("diploma.Data.Entities.FacetItem", "Competence")
-                        .WithMany()
-                        .HasForeignKey("CompetenceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("diploma.Data.Entities.FacetItem", "Level")
-                        .WithMany()
-                        .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("diploma.Data.Entities.Vacancy", "Vacancy")
-                        .WithMany("VacancyCompetences")
-                        .HasForeignKey("VacancyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("diploma.Data.Entities.Word", b =>

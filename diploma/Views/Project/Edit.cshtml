@@ -1,0 +1,33 @@
+﻿@model diploma.Data.Entities.Project
+
+<h2>Проект</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form id="user-info-form" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="@Model.Name"></label>
+                <input asp-for="@Model.Name" class="form-control" />
+                <span asp-validation-for="@Model.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.Description"></label>
+                <textarea asp-for="@Model.Description" class="form-control"></textarea>
+                <span asp-validation-for="@Model.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.DateStart"></label>
+                <input asp-for="@Model.DateStart" class="form-control" />
+                <span asp-validation-for="@Model.DateStart" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.DateEnd"></label>
+                <input asp-for="@Model.DateEnd" class="form-control" />
+                <span asp-validation-for="@Model.DateEnd" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>

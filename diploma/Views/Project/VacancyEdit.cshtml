@@ -1,0 +1,72 @@
+﻿@model VacancyViewModel
+
+<h2>Вакансия</h2>
+
+<h3>Основная информация</h3>
+<div class="row">
+    <div class="col-md-6">
+        <form id="user-info-form" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <input asp-for="@Model.Vacancy.ProjectId" class="form-control" type="hidden">
+                <span asp-validation-for="@Model.Vacancy.ProjectId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.Vacancy.Name"></label>
+                <input asp-for="@Model.Vacancy.Name" class="form-control" />
+                <span asp-validation-for="@Model.Vacancy.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.Applicant.Id"></label>
+                <select class="data-select-list" asp-for="@Model.Applicant.Id" asp-items="@Model.UsersSelectList"></select>
+                <span asp-validation-for="@Model.Applicant.Id" class="text-danger"></span>
+            </div>
+
+            <input asp-for="@Model.Competences" type="hidden" />
+            <input asp-for="@Model.UsersSelectList" type="hidden" />
+
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<!-- Если ранее создали вакансию, то только тогда можно заполнить сведения о требуемых навыках-->
+@if (Model.Vacancy != null && Model.Vacancy.Id != 0)
+{
+    <h3>Требуемые компетенции</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table">
+                <tr>
+                    <th>Категория</th>
+                    <th>Компетенция</th>
+                    <th>Уровень подготовки</th>
+                    <th></th>
+                </tr>
+                @foreach (var item in Model.Competences)
+                {
+                    <tr class="competence-row">
+                        <td>
+                            @(item.Category)
+                        </td>
+                        <td>
+                            @(item.Name)
+                        </td>
+                        <td>
+                            @(item.Level)
+                        </td>
+                        <td>
+                            <form asp-controller="Project" asp-action="DeleteCompetence" asp-route-id="@item.Competence.Id" asp-route-projectid="@Model.Vacancy.ProjectId" asp-route-vacancyid="@Model.Vacancy.Id" method="post">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    Удалить
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+
+    <a class="btn btn-sm btn-primary" asp-controller="Project" asp-action="AddCompetence" asp-route-vacancyid="@Model.Vacancy.Id" asp-route-projectid="1">Добавить компетенцию</a>
+}

@@ -1,0 +1,32 @@
+﻿@model UserCompetenceListViewModel
+
+<h2>Предметные области и навыки исполнителя</h2>
+
+<table class="table">
+    <tr>
+        <th>Группа</th>
+        <th>Наименование</th>
+        <th>Уровень подготовки</th>
+        <th colspan="2">Действия</th>
+    </tr>
+    @foreach (var item in Model.List)
+    {
+        <tr>
+            <td>@item.Category</td>
+            <td>@item.Competence</td>
+            <td>@item.Level</td>
+            <td>
+                <a class="btn btn-sm btn-primary" asp-controller="User" asp-action="CompetenceEdit" asp-route-id="@item.Id">Редактировать</a>
+            </td>
+            <td>
+                <form asp-action="CompetenceDelete" asp-route-id="@item.Id" asp-route-userid="@Model.UserId" method="post">
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        Удалить
+                    </button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>
+
+<a class="btn btn-sm btn-primary" asp-controller="User" asp-action="CompetenceEdit" asp-route-userid="@Model.UserId">Добавить навык</a>

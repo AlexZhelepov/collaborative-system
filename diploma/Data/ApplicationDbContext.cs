@@ -34,5 +34,9 @@ namespace diploma.Data
         public DbSet<Word> Words { get; set; }
         public DbSet<Facet> Facets { get; set; }
         public DbSet<FacetItem> FacetItems { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<UserCompetence> UserCompetences { get; set; }
+        public DbSet<Vacancy> Vacancies { get; set; }
+        public DbSet<VacancyCompetence> VacancyCompetences { get; set; }
     }
 }

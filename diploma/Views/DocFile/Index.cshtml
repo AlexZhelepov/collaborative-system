@@ -7,6 +7,8 @@
         <th>Пользователь</th>
         <th>Скачать</th>
         <th>Хеш файла</th>
+        <th>Исполитель</th>
+        <th>Информация об исполнителе</th>
         <th colspan="2">Действия</th>
     </tr>
     @foreach (var item in Model)
@@ -15,6 +17,8 @@
             <td>@item.ApplicationUserId</td>
             <td><a href="@("/" + item.FileName)">Скачать</td>
             <td>@item.FileHash</td>
+            <td>@item.FIO</td>
+            <td>@item.Skills</td>
             <td><a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@item.Id">Подробнее</a></td>
             <td>
                 <form asp-action="Delete" asp-route-id="@item.Id" method="post">

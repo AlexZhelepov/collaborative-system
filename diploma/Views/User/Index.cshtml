@@ -1,0 +1,47 @@
+﻿@model IEnumerable<UserViewModel>
+
+<h2>Список пользователей</h2>
+
+<table class="table">
+    <tr>
+        <th>ID</th>
+        <th>Пользуется системой?</th>
+        <th>Аватарка</th>
+        <th>ФИО</th>
+        <th>Действия</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.UserInfo.UserId</td>
+            <td>
+                @if (item.User != null)
+                {
+                    <span>@item.User.Email</span>
+                }
+                else 
+                {
+                    <span>Не пользуется — <a asp-controller="User" asp-action="Edit" asp-route-id="@item.UserInfo.Id">Наказать?</a></span>
+                }
+            </td>
+            <td>
+                @if (!string.IsNullOrEmpty(item.UserInfo.AvatarPath))
+                {
+                    <img style="max-height: 30px" src="@("/" + item.UserInfo.AvatarPath)"/>
+                }
+                else 
+                {
+                    <a asp-controller="User" asp-action="Edit" asp-route-id="@item.UserInfo.Id">Загрузить?</a>
+                }
+            </td>
+            <td>@item.UserInfo.Name</td>
+            <td>
+                <a asp-controller="User" asp-action="CompetenceList" asp-route-id="@item.UserInfo.Id">Что могёт?</a>
+                <a asp-controller="User" asp-action="Edit" asp-route-id="@item.UserInfo.Id">Редактировать</a>
+            </td>
+        </tr>
+    }
+</table>
+
+<a class="btn btn-sm btn-primary" asp-controller="User" asp-action="Edit">Создать пользователя</a>
+

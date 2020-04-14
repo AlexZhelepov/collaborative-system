@@ -22,15 +22,12 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Главная</a>
                         </li>
-                        <!--@if (User.Identity.IsAuthenticated && User.IsInRole("admin"))
+                        @if (User.Identity.IsAuthenticated && User.IsInRole("admin"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Администрирование</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Roles" asp-action="Index">Управление ролями</a>
-                            </li>
-                        }-->
+                            </li>                        
+                        }
                         @if (User.Identity.IsAuthenticated && User.IsInRole("file_admin"))
                         {
                             <li class="nav-item">
