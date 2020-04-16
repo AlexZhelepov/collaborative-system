@@ -280,6 +280,113 @@ namespace diploma.Controllers
             return RedirectToAction("CompetenceList", new { id = userid });
         }
         #endregion
+
+        #region
+
+        /// <summary>
+        /// Делает импорт пользователеи и их компетенции в UserInfo таблицу.
+        /// </summary>
+        public async Task<IActionResult> ImportUserInfos() 
+        {
+            using var db = AppContextFactory.DB;
+            using var t = db.Database.BeginTransaction();
+
+            int levelId = db.FacetItems.FirstOrDefault(i => i.Name == "низкий").Id; // надеемся и свято верим что он там есть. А чтобы узнать, спецом в try не сунул =)
+
+            try
+            {
+                // Стадия 1. Обновление существующих пользователеи (+ их компетенции).
+                // Правила игры: только добавляем новые компетенции. Ничего не обновляем и ничего в целом тут не делаем.
+                var oldUsers = db.DocFiles.Where(i => i.UserInfoId.HasValue);
+
+                foreach (var u in oldUsers)
+                {
+                    // Забираем скилы из фаила.
+                    var skills = (from w in db.Words
+                                  where w.DocFileId == u.Id && w.FacetItemId.HasValue
+                                  join fi in db.FacetItems on w.FacetItemId equals fi.Id
+                                  select fi.Id).ToList();
+
+                    // Ищем компетенции, которые есть у пользователя на текущии момент.
+                    var alreadyExisting = (from uc in db.UserCompetences
+                                           where uc.UserInfoId == u.UserInfoId
+                                           select uc.CompetenceId).ToList();
+
+                    // То что добавить нужно будет.
+                    var toAdd = skills.Except(alreadyExisting);
+
+                    foreach (var c in toAdd) 
+                    {
+                        UserCompetence uc = new UserCompetence()
+                        {
+                            LevelId = levelId,
+                            CompetenceId = c,
+                            UserInfoId = u.UserInfoId.Value
+                        };
+
+                        db.Entry(uc).State = EntityState.Modified;
+                        await db.SaveChangesAsync();
+                    }
+                }
+
+                // Стадия 2. Добавление новых пользователеи (+ их компетенции).
+                // Правила игры: уровень импорта скилов всегда ставив самыи низкии.
+                var newUsers = db.DocFiles.Where(i => !i.UserInfoId.HasValue);
+
+                foreach (var u in newUsers)
+                {
+                    // Забираем скилы из фаила.
+                    var skills = (from w in db.Words
+                                  where w.DocFileId == u.Id && w.FacetItemId.HasValue
+                                  join fi in db.FacetItems on w.FacetItemId equals fi.Id
+                                  join f in db.Facets on fi.FacetId equals f.Id
+                                  select new { skillId = fi.Id }).ToList();
+
+                    // Сохраняем пользователя со всеми потрохами.
+                    UserInfo ui = new UserInfo()
+                    {
+                        Name = u.FIO,
+                        CareerStart = DateTime.Now.Date //да просто рандомная дата. Как говорил один из персонажей в моей жизни бесполезной: "ГАВНОМ ЗАБИВАй (Звучит прям как "Родину Защищай".). Есть, Андрей Николаевич - чту, горжусь, помню и славно следую принципу борьбы с not null полями =)"
+                    };
+
+                    db.Entry(ui).State = EntityState.Added;
+                    await db.SaveChangesAsync();
+
+                    // Сохраняем связь между пользователем и документом.
+                    u.UserInfoId = ui.Id;
+                    db.Entry(u).State = EntityState.Modified;
+                    await db.SaveChangesAsync();
+
+                    // Сохраняем данные о компетенциях пользователя.
+                    if (skills.Any()) 
+                    {
+                        foreach (var s in skills) 
+                        {
+                            UserCompetence uc = new UserCompetence()
+                            {
+                                LevelId = levelId,
+                                CompetenceId = s.skillId,
+                                UserInfoId = ui.Id
+                            };
+
+                            db.Entry(uc).State = EntityState.Modified;
+                            await db.SaveChangesAsync();
+                        }
+                    }
+                }
+
+                await t.CommitAsync();
+            }
+            catch (Exception ex) 
+            {
+                await t.RollbackAsync();
+                ModelState.AddModelError("Error", "В процессе импорта произошла ошибка! Ошибка: " + ex.Message);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        #endregion
     }
 
     public static class AvatarHelper

@@ -38,6 +38,17 @@ namespace diploma.Data.Entities
         /// </summary>
         public string WorkPlace { get; set; }
 
+        /// <summary>
+        /// Отношение к предметной области, к классу.
+        /// </summary>
+        [ForeignKey("FacetItem")]
+        public int? ClassId { get; set; }
+
+
+        [ForeignKey("UserInfo")]
+        public int? UserInfoId { get; set; }
+
+
         [ForeignKey("ApplicationUser")]
         public string ApplicationUserId { get; set; }
 

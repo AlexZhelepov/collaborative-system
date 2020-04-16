@@ -4,6 +4,8 @@
 
 <table class="table">
     <tr>
+        <th>ID</th>
+        <th>Документ</th>
         <th>Исполнитель</th>
         <th>Должность</th>
         <th>Классы и принадлежности (%)</th>
@@ -12,8 +14,10 @@
     @foreach (var item in Model)
     {
         <tr>
+            <td>@item.Document.Id</td>
+            <td><a href="@("/" + item.Document.FileName)">Скачать</a></td>
             <td>@item.Document.FIO</td>
-            <td>@item.Document.WorkPlace</td>
+            <td>@item.Document.Skills</td>
             <td>
                 @foreach (var subject in item.SubjectsAccessory)
                 {

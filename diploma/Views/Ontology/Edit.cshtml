@@ -1,0 +1,23 @@
+﻿@model OntologyEditViewModel
+
+<h2>Создание класса</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form id="user-info-form" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="@Model.FacetId"></label>
+                <select class="data-select-list" asp-for="@Model.FacetId" asp-items="@Model.Facets"></select>
+                <span asp-validation-for="@Model.FacetId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.ElementName"></label>
+                <input asp-for="@Model.ElementName" class="form-control">
+                <span asp-validation-for="@Model.ElementName" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>

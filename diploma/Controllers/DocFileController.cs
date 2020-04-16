@@ -143,7 +143,7 @@ namespace diploma.Controllers
                 model.Words.Add(new DocFileDetailsItem() { Word = item, Types = selectedList });
             }
 
-            model.Words = model.Words.OrderByDescending(i => i.Word.HasMeaning).ToList();
+            model.Words = model.Words.OrderByDescending(i => i.Word.HasMeaning && i.Word.FacetItemId.HasValue).ToList();
 
             return View(model);
         }

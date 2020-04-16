@@ -1,0 +1,34 @@
+﻿@model LearningResultViewModel
+
+<h2>Результат интеллектуального подбора</h2>
+
+<table class="table">
+    <tr>
+        <th>Класс</th>
+        <th>Число пересечений терминов</th>
+    </tr>
+    @foreach (var item in Model.Result)
+    {
+        <tr>
+            <td>@item.Key.Name</td>
+            <td>@item.Value</td>
+        </tr>
+    }
+</table>
+
+<h3>А теперь сделай свой выбор: за Альянс или Орду? Ну или просто категорию выбери...</h3>
+<div class="row">
+    <div class="col-md-6">
+        <form id="user-info-form" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="@Model.ClassId"></label>
+                <select class="data-select-list" asp-for="@Model.ClassId" asp-items="@Model.Choice"></select>
+                <span asp-validation-for="@Model.ClassId" class="text-danger"></span>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+

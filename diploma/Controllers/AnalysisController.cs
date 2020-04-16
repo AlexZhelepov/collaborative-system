@@ -37,7 +37,10 @@ namespace diploma.Controllers
             ).ToList();
 
             var list = new List<AnalysisViewModel>();
-            docs.ForEach(i => { list.Add(AnalysisHelper.CalcDocStats(db, i, subjects, skills)); });
+            docs.ForEach(i =>
+            {
+                list.Add(AnalysisHelper.CalcDocStats(db, i, subjects, skills));
+            });
 
             return View(list);
         }
@@ -121,27 +124,21 @@ namespace diploma.Controllers
     {
         public static AnalysisViewModel CalcDocStats(ApplicationDbContext db, DocFile document, List<FacetItem> subjects, List<FacetItem> skills)
         {
-            var words = db.Words.Where(i => i.DocFileId == document.Id);
+            // Слова текста имеющие какое-то значение.
+            var words = db.Words.Where(i => i.FacetItemId.HasValue && i.DocFileId == document.Id).ToList();
 
             // Данные на выход.
             Dictionary<string, double> subjectsAccessory = new Dictionary<string, double>();
             List<string> personalSkills = new List<string>();
 
-            // TODO.
-            var groupedTerms = (from w in db.Words
-                                where w.FacetItemId.HasValue && w.DocFileId == document.Id
-                                join fi in subjects on w.FacetItemId.Value equals fi.Id
+            var groupedTerms = (from w in words
+                                join fi in subjects on w.FacetItemId equals fi.Id
                                 group fi by fi.Name into grp
                                 select new { name = grp.Key, count = grp.Count() }).ToList();
 
-            //var items = Context.Assets.AsEnumerable().GroupBy(p => p.CategoryName).Select(p => new AssetCategorySummary
-            //{
-            //    CategoryId = p.Select(r => r.CategoryId).FirstOrDefault(),
-            //    CategoryName = p.Select(r => r.CategoryName).FirstOrDefault(),
-            //    TotalAsset = p.Count()
-            //}).ToList();
+            var sum = groupedTerms.Sum(i => i.count);
 
-            subjectsAccessory = groupedTerms.ToDictionary(i => i.name, i => (double)i.count / groupedTerms.Count);
+            subjectsAccessory = groupedTerms.ToDictionary(i => i.name, i => Math.Round(((double)i.count / sum) * 100, 2));
             personalSkills = (
                 from w in words
                 join fi in skills on w.FacetItemId equals fi.Id

@@ -1,0 +1,43 @@
+﻿using diploma.Data.Entities;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace diploma.Models
+{
+    /// <summary>
+    /// Для списка.
+    /// </summary>
+    public class LearningViewModel
+    {
+        public DocFile Doc { get; set; }
+        public FacetItem Class { get; set; }
+    }
+
+    /// <summary>
+    /// Для редактирования и обновления терминов.
+    /// </summary>
+    public class LearningEditViewModel
+    {
+        [Display(Name = "Документ")]
+        public int DocId { get; set; }
+
+        [Display(Name = "Класс")]
+        public int? ClassId { get; set; }
+
+        public List<SelectListItem> Classes { get; set; }
+    }
+
+    public class LearningResultViewModel
+    {
+        [Display(Name = "Подобранные категории")]
+        public int? ClassId { get; set; }
+        public Dictionary<FacetItem, int> Result { get; set; }
+        public List<SelectListItem> Choice { get; set; }
+    }
+}

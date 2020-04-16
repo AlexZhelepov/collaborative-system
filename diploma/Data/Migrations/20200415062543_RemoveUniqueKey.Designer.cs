@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using diploma.Data;
@@ -9,9 +10,10 @@ using diploma.Data;
 namespace diploma.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200415062543_RemoveUniqueKey")]
+    partial class RemoveUniqueKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -224,9 +226,6 @@ namespace diploma.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("ClassId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("FIO")
                         .HasColumnType("text");
 
@@ -240,9 +239,6 @@ namespace diploma.Data.Migrations
 
                     b.Property<string>("Skills")
                         .HasColumnType("text");
-
-                    b.Property<int?>("UserInfoId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("WorkPlace")
                         .HasColumnType("text");
@@ -452,9 +448,6 @@ namespace diploma.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<bool>("HasMeaning")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("HasMeaningClass")
                         .HasColumnType("boolean");
 
                     b.Property<string>("InitialForm")

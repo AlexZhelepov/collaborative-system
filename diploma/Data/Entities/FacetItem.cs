@@ -19,6 +19,6 @@ namespace diploma.Data.Entities
 
         [Required]
         public Facet Facet { get; set; }
-        public virtual Word Word { get; set; }
+        //public virtual Word Word { get; set; }
     }
 }

@@ -15,12 +15,13 @@ namespace diploma.Data.Entities
         
         [Required]
         public string Name { get; set; }
+
         public string AvatarPath { get; set; }
         
         [Required]
         public DateTime CareerStart { get; set; }
+        
         public DateTime VacationStart { get; set; }
-
 
         [ForeignKey("ApplicationUser")]
         public string UserId { get; set; }

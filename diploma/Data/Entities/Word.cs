@@ -30,6 +30,11 @@ namespace diploma.Data.Entities
         public bool HasMeaning { get; set; }
 
         /// <summary>
+        /// Означает является ли слово значимым в рамках папки.
+        /// </summary>
+        public bool HasMeaningClass { get; set; }
+
+        /// <summary>
         /// Частота встречаемости слова в тексте.
         /// </summary>
         public int Frequency { get; set; }

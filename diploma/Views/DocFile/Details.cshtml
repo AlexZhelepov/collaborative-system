@@ -5,6 +5,8 @@
 <form asp-action="UpdateWords" asp-route-id="@Model.Document.Id" method="post">
     <table class="table">
         <tr>
+            <th style="max-width:20px;">ТСД</th>
+            <th style="max-width:20px;">ТСК</th>
             <th>Слово в тексте</th>
             <th>Начальная форма</th>
             <th>Принадлежность</th>
@@ -12,7 +14,9 @@
 
         @foreach (var item in Model.Words)
         {
-            <tr style="@(!item.Word.HasMeaning ? "background-color: lightgray" : string.Empty)">
+            <tr>
+                <td style="@(!item.Word.HasMeaning ? "border: 1px solid black; background-color: green; max-width: 20px" : "border: 1px solid black; background-color: red; max-width: 20px")"></td>
+                <td style="@(!item.Word.HasMeaningClass ? "border: 1px solid black; background-color: green; max-width: 20px" : "border: 1px solid black; background-color: red; max-width: 20px")"></td>
                 <td>@item.Word.TextVersion</td>
                 <td>@item.Word.InitialForm</td>
                 <td>
@@ -66,12 +70,11 @@
                     body: JSON.stringify(data),
                     headers: { 'Content-Type': 'application/json' }
                 }).then((res) => {
-                    console.log(res)
-                    alert(res)
+                    alert('Ууууспех!')
                 }).catch((err) => {
-                    alert('Error');
+                    alert('Ошибка! Все из-за твоих кривых рук!')
                 }).finally(() => {
-
+                    location.reload()
                 })
             })
         })

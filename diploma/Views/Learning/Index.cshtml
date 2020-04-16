@@ -1,0 +1,47 @@
+﻿@model IEnumerable<LearningViewModel>
+
+<h2>Обучающая выборка</h2>
+
+<table class="table">
+    <tr>
+        <th>ID</th>
+        <th>Название</th>
+        <th>Исполнитель</th>
+        <th>Информация об исполнителе</th>
+        <th>Класс</th>
+        <th colspan="3">Действие</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Doc.Id</td>
+            <td>
+                @(System.IO.Path.GetFileName(item.Doc.FileName))
+                <a href="@("/" + item.Doc.FileName)">Скачать</a>
+            </td>
+            <td>@item.Doc.FIO</td>
+            <td>@item.Doc.Skills</td>
+            <td>@(item.Doc.ClassId.HasValue ? item.Class.Name : "Класс не присвоен")</td>
+            <td>
+                <a class="btn btn-sm btn-info" asp-controller="DocFile" asp-action="Details" asp-route-id="@item.Doc.Id">Термины</a>
+            </td>
+            <td>
+                <a class="btn btn-sm btn-primary" asp-controller="Learning" asp-action="DefineClass" asp-route-id="@item.Doc.Id">Определить класс</a>
+            </td>
+            <td>
+                <a class="btn btn-sm btn-primary" asp-controller="Learning" asp-action="Edit" asp-route-id="@item.Doc.Id">
+                    @if (item.Doc.ClassId.HasValue)
+                    {
+                        <span>Сменить класс</span>
+                    }
+                    else
+                    {
+                        <span>Установить класс</span>
+                    }
+                </a>
+            </td>
+        </tr>
+    }
+</table>
+
+<a class="btn btn-sm btn-primary" asp-controller="Learning" asp-action="UpdateMeaningInGroups">Подготовить обучающие выборки</a>
