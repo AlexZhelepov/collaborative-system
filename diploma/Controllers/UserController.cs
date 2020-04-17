@@ -225,10 +225,10 @@ namespace diploma.Controllers
             {
                 return View(
                     new UserCompetenceEditViewModel()
-                    { 
-                        UserCompetence = model, 
-                        Competences = DataHelper.CreateSelectListItem(db, model.CompetenceId, "subjects", "skills"), 
-                        Levels = DataHelper.CreateSelectListItem(db, model.LevelId, "levels") 
+                    {
+                        UserCompetence = model,
+                        Competences = DataHelper.CreateSelectListItem(db, model.CompetenceId, "subjects", "skills"),
+                        Levels = DataHelper.CreateSelectListItem(db, model.LevelId, "levels")
                     });
             }
 
@@ -286,7 +286,7 @@ namespace diploma.Controllers
         /// <summary>
         /// Делает импорт пользователеи и их компетенции в UserInfo таблицу.
         /// </summary>
-        public async Task<IActionResult> ImportUserInfos() 
+        public async Task<IActionResult> ImportUserInfos()
         {
             using var db = AppContextFactory.DB;
             using var t = db.Database.BeginTransaction();
@@ -297,7 +297,7 @@ namespace diploma.Controllers
             {
                 // Стадия 1. Обновление существующих пользователеи (+ их компетенции).
                 // Правила игры: только добавляем новые компетенции. Ничего не обновляем и ничего в целом тут не делаем.
-                var oldUsers = db.DocFiles.Where(i => i.UserInfoId.HasValue);
+                var oldUsers = db.DocFiles.Where(i => i.UserInfoId.HasValue).ToList();
 
                 foreach (var u in oldUsers)
                 {
@@ -315,7 +315,7 @@ namespace diploma.Controllers
                     // То что добавить нужно будет.
                     var toAdd = skills.Except(alreadyExisting);
 
-                    foreach (var c in toAdd) 
+                    foreach (var c in toAdd)
                     {
                         UserCompetence uc = new UserCompetence()
                         {
@@ -324,14 +324,14 @@ namespace diploma.Controllers
                             UserInfoId = u.UserInfoId.Value
                         };
 
-                        db.Entry(uc).State = EntityState.Modified;
+                        db.Entry(uc).State = EntityState.Added;
                         await db.SaveChangesAsync();
                     }
                 }
 
                 // Стадия 2. Добавление новых пользователеи (+ их компетенции).
                 // Правила игры: уровень импорта скилов всегда ставив самыи низкии.
-                var newUsers = db.DocFiles.Where(i => !i.UserInfoId.HasValue);
+                var newUsers = db.DocFiles.Where(i => !i.UserInfoId.HasValue).ToList();
 
                 foreach (var u in newUsers)
                 {
@@ -358,9 +358,9 @@ namespace diploma.Controllers
                     await db.SaveChangesAsync();
 
                     // Сохраняем данные о компетенциях пользователя.
-                    if (skills.Any()) 
+                    if (skills.Any())
                     {
-                        foreach (var s in skills) 
+                        foreach (var s in skills)
                         {
                             UserCompetence uc = new UserCompetence()
                             {
@@ -369,7 +369,7 @@ namespace diploma.Controllers
                                 UserInfoId = ui.Id
                             };
 
-                            db.Entry(uc).State = EntityState.Modified;
+                            db.Entry(uc).State = EntityState.Added;
                             await db.SaveChangesAsync();
                         }
                     }
@@ -377,13 +377,105 @@ namespace diploma.Controllers
 
                 await t.CommitAsync();
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 await t.RollbackAsync();
                 ModelState.AddModelError("Error", "В процессе импорта произошла ошибка! Ошибка: " + ex.Message);
             }
 
             return RedirectToAction("Index");
+        }
+
+        /// <summary>
+        /// Объединение пользователеи (нужно после испорта, потому что в документах люди могут дублироваться).
+        /// Объединять можно только двоих за раз. Не более.
+        /// </summary>
+        [HttpPost]
+        public async Task<JsonResult> JoinUserInfos([FromBody] int[] data)
+        {
+            using var db = AppContextFactory.DB;
+            using var t = db.Database.BeginTransaction();
+
+            try
+            {
+                var user_1 = db.UserInfos.First(i => i.Id == data[0]);
+                var user_2 = db.UserInfos.First(i => i.Id == data[1]);
+
+                // Есть ли на втором пользователе проекты? Привязан ли он ко второму пользователю?
+                var vacancies_2 = db.Vacancies.Where(i => i.UserInfoId == user_2.Id).ToList();
+
+                if (vacancies_2.Count > 0)
+                {
+                    foreach (var v in vacancies_2)
+                    {
+                        v.UserInfoId = user_1.Id;
+                        await db.SaveChangesAsync();
+                    }
+                }
+
+                // Есть ли привязка к пользователю в системе?
+                if (!string.IsNullOrEmpty(user_2.UserId))
+                {
+                    // Если уже есть привязка к пользователю, то перевешиваем.
+                    user_1.UserId ??= user_2.UserId;
+                    await db.SaveChangesAsync();
+                }
+
+                // Если есть закрепленные навыки и предметные области.
+                var competences_2 = db.UserCompetences.Where(i => i.UserInfoId == user_2.Id).ToList();
+                var competences_1 = db.UserCompetences.Where(i => i.UserInfoId == user_1.Id).ToList();
+
+                if (competences_2.Count > 0)
+                {
+                    foreach (var c in competences_2)
+                    {
+                        if (competences_1.Any(i => i.CompetenceId == c.Id))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            c.UserInfoId = user_1.Id;
+                            await db.SaveChangesAsync();
+                        }
+                    }
+                }
+
+                // Обновляем все DocFiles, чтобы повторно не плодить исполнителеи.
+                var docFiles_2 = db.DocFiles.Where(i => i.UserInfoId == user_2.Id).ToList();
+
+                foreach (var file in docFiles_2) 
+                {
+                    file.UserInfoId = user_1.Id;
+                    await db.SaveChangesAsync();
+                }
+
+                // И, напоследок, удаляем или перемещаем аватарку пользователя.
+                if (!string.IsNullOrEmpty(user_2.AvatarPath))
+                {
+                    if (string.IsNullOrEmpty(user_1.AvatarPath))
+                    {
+                        user_1.AvatarPath = user_2.AvatarPath;
+                        await db.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        AvatarHelper.DeleteFile(_env, user_2.AvatarPath);
+                    }
+                }
+
+                db.UserInfos.Remove(user_2);
+                await db.SaveChangesAsync();
+
+                await t.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await t.RollbackAsync();
+                return Json(new { error = true, message = "Нельзя сотворить здесь!" });
+            }
+
+            return Json(new { error = false, message = "Исследование завершено!" });
         }
 
         #endregion

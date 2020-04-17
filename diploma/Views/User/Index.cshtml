@@ -4,6 +4,7 @@
 
 <table class="table">
     <tr>
+        <th></th>
         <th>ID</th>
         <th>Пользуется системой?</th>
         <th>Аватарка</th>
@@ -13,6 +14,9 @@
     @foreach (var item in Model)
     {
         <tr>
+            <td>
+                <input type="checkbox" class="checking" value="@item.UserInfo.Id" />
+            </td>
             <td>@item.UserInfo.UserId</td>
             <td>
                 @if (item.User != null)
@@ -45,4 +49,53 @@
 
 <a class="btn btn-sm btn-primary" asp-controller="User" asp-action="Edit">Создать пользователя</a>
 <a class="btn btn-sm btn-primary" asp-controller="User" asp-action="ImportUserInfos">Импортировать пользователей</a>
+<a class="btn btn-sm btn-primary" id="join-users" asp-controller="User" asp-action="JoinUserInfos">Объединить пользователей</a>
 
+@section Scripts {
+    <script type="text/javascript">
+        var checklist = [];
+
+        document.addEventListener('change', function (evt) {
+            var el = evt.target;
+            var val = el.value | 0; // to int
+
+            if (el.checked) {
+                checklist.push(val); // если в начало, то .ushift(val)
+            } else {
+                var idx = checklist.indexOf(val);
+                if (idx > -1) {
+                    checklist.splice(idx, 1);
+                }
+            }
+        }, false);
+
+        $('#join-users').on('click', function (evt) {
+            evt.preventDefault();
+            var el = evt.target;
+
+            if (checklist.length === 2) {
+                // 1-ыи элемент ведущии, к нему все и присоединяются.
+                alert('Начинаем объединение')
+
+                // Отправляем их на сервачок, который к моменту сдачи надеюсь еще будет работать, да и вообще хаос не наступит (если не наступит, то бросьте в меня камень) =)
+                fetch('/User/JoinUserInfos', {
+                    method: 'POST',
+                    body: JSON.stringify(checklist),
+                    headers: { 'Content-Type': 'application/json' }
+                }).then((res) => {
+                    alert('Исследование завершено!')
+                    console.log(res)
+                }).catch((err) => {
+                    alert('Ошибка! Все из-за твоих кривых рук!')
+                    console.log(err)
+                }).finally(() => {
+                    location.reload()
+                })
+
+            } else {
+                alert('Необходимо только выбрать 2-х пользователей для объединения')
+            }
+        });
+
+    </script>
+} 
