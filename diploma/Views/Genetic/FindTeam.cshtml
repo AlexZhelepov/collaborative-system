@@ -1,0 +1,95 @@
+﻿@model GeneticChoiceViewModel
+@{
+    int place = 1;
+}
+
+<h2>Рейтинг (не) Tagline команд на проект</h2>
+<p>
+    Чтобы выбрать команду рабов просто нажми посильнее (не сломай кнопку ладошкой) на табличку!
+</p>
+
+@foreach (var team in Model.Teams)
+{
+    var list = team.Members.Select(i => new { employee = i.Employee.Id, vacancy = i.Vacancy.Id }).ToList();
+    var json = Newtonsoft.Json.JsonConvert.SerializeObject(new { projectId = Model.ProjectId, list});
+
+    <p>
+        @json    
+    </p>
+
+    <br />
+    <div class="clickable" data-json="@(json)">
+        <h4>@place — место. Рейтинг: @team.Rating</h4>
+        <table data-pos="@place">
+            <tr>
+                <th>Вакансия</th>
+                <th>Исполнитель</th>
+                <th>Рейтинг исполнителя</th>
+            </tr>
+            @foreach (var member in team.Members)
+            {
+                <tr>
+                    <td>
+                        @member.Vacancy.Name
+                    </td>
+                    <td>
+                        @member.Employee.Name
+                    </td>
+                    <td>
+                        @member.Rating
+                    </td>
+                </tr>
+            }
+        </table>
+
+        <hr />
+    </div>
+
+    place++;
+}
+
+<br/><br />
+<button id="btn-save" class="btn btn-danger">Сохранить исполнителей</button>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(() => {
+            $('.clickable').on('click', (e) => {
+                // Стили накладываем по-взрослому, таблица стилей для нубов! Только ачивки, только хардкор (https://www.youtube.com/watch?v=OMbnCbW0F5A&t=56).
+                $('.clickable').css({ 'background-color': 'white' }).removeClass('selected');
+                $(e.target).closest('.clickable').css({ 'background-color': 'green' }).addClass('selected');
+            });
+
+            $('#btn-save').on('click', (e) => {
+                let $selected = $('.selected');
+
+                if ($selected && $selected.length == 1) {
+                    alert('Выбор сделан! А тебе уже есть 18?)')
+                    alert('Точно?')
+
+                    let json = $selected.data('json');
+
+                    console.log(json)
+
+                    // Запускаем механизм закрепления исполнителей за проектом.
+                    fetch('/Genetic/FindTeam', {
+                        method: 'POST',
+                        body: JSON.stringify(json),
+                        headers: { 'Content-Type': 'application/json' }
+                    }).then((res) => {
+                        alert('Исследование завершено!')
+                        console.log(res)
+                    }).catch((err) => {
+                        alert('Ошибка! Все из-за твоих кривых рук!')
+                        console.log(err)
+                    }).finally(() => {
+                        location.reload()
+                    })
+                }
+                else {
+                    alert('Сделай свой выбор! Не бойся, не упадет, наверное...');
+                }
+            });
+        });
+    </script>
+}

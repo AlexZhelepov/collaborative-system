@@ -27,7 +27,7 @@ namespace diploma.Controllers
 
             // Достаем из базы список всех проектов.
             var list = db.Projects.ToList();
-
+            
             return View(list);
         }
 

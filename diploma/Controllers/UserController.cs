@@ -215,7 +215,7 @@ namespace diploma.Controllers
 
             using var db = AppContextFactory.DB;
 
-            if (db.UserCompetences.Any(i => i.CompetenceId == model.CompetenceId && i.Id != id))
+            if (db.UserCompetences.Any(i => i.CompetenceId == model.CompetenceId && i.Id != id && i.UserInfoId == model.UserInfoId))
             {
                 ModelState.AddModelError("Error", "Такая компетенция уже добавлена!");
             }

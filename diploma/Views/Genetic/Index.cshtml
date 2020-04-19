@@ -1,0 +1,40 @@
+﻿@model GeneticViewModel
+
+<h2>Параметры генетического алгоритма</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form id="user-info-form" method="get" asp-action="FindTeam">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <input asp-for="@Model.ProjectId" type="hidden" />
+                <span asp-validation-for="@Model.ProjectId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.TeamCount"></label>
+                <input asp-for="@Model.TeamCount" type="number" />
+                <span asp-validation-for="@Model.TeamCount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.SubstitutionsCount"></label>
+                <input asp-for="@Model.SubstitutionsCount" type="number" />
+                <span asp-validation-for="@Model.SubstitutionsCount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.EliteCount"></label>
+                <input asp-for="@Model.EliteCount" type="number" />
+                <span asp-validation-for="@Model.EliteCount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.IterationsCount"></label>
+                <input asp-for="@Model.IterationsCount" type="number" />
+                <span asp-validation-for="@Model.IterationsCount" class="text-danger"></span>
+            </div>
+            <p>
+                Та самая красная кнопка, руками не нажимать!
+            </p>
+            <button type="submit" class="btn btn-danger">Пуск</button>
+        </form>
+    </div>
+</div>
+

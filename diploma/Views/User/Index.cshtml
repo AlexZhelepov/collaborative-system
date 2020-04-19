@@ -23,7 +23,7 @@
                 {
                     <span>@item.User.Email</span>
                 }
-                else 
+                else
                 {
                     <span>Не пользуется — <a asp-controller="User" asp-action="Edit" asp-route-id="@item.UserInfo.Id">Наказать?</a></span>
                 }
@@ -31,9 +31,9 @@
             <td>
                 @if (!string.IsNullOrEmpty(item.UserInfo.AvatarPath))
                 {
-                    <img style="max-height: 30px" src="@("/" + item.UserInfo.AvatarPath)"/>
+                    <img style="max-height: 30px" src="@("/" + item.UserInfo.AvatarPath)" />
                 }
-                else 
+                else
                 {
                     <a asp-controller="User" asp-action="Edit" asp-route-id="@item.UserInfo.Id">Загрузить?</a>
                 }
@@ -50,6 +50,7 @@
 <a class="btn btn-sm btn-primary" asp-controller="User" asp-action="Edit">Создать пользователя</a>
 <a class="btn btn-sm btn-primary" asp-controller="User" asp-action="ImportUserInfos">Импортировать пользователей</a>
 <a class="btn btn-sm btn-primary" id="join-users" asp-controller="User" asp-action="JoinUserInfos">Объединить пользователей</a>
+<a class="btn btn-sm btn-danger" asp-controller="Genetic" asp-action="RandomizeSkills">Генерация умений</a>
 
 @section Scripts {
     <script type="text/javascript">
