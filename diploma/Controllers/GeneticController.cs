@@ -213,26 +213,32 @@ namespace diploma.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> FindTeam([FromBody] string json) 
+        public async Task<JsonResult> FindTeam([FromBody] GeneticSaveModel data) 
         {
             using var db = AppContextFactory.DB;
             using var t = db.Database.BeginTransaction();
 
             try
             {
-                // 1...
+                int n = 0;
+                foreach (var v in data.Vacancies) 
+                {
+                    var vacancy = db.Vacancies.First(i => i.Id == v);
+                    vacancy.UserInfoId = data.Employees[n];
+                    n++;
+                }
 
                 await db.SaveChangesAsync();
                 await t.CommitAsync();
             }
             catch (Exception ex) 
             {
-                ModelState.AddModelError("Error", "Произошла ошибка при сохранении команды!");
                 await t.RollbackAsync();
+                ModelState.AddModelError("Error", "Произошла ошибка при сохранении команды!");
             }
 
             // Возвращаемся к проекту.
-            return RedirectToAction("Details", "Project", new { projectid = 1 });
+            return new JsonResult(new { error = false, message = "Исследование завершено!" });
         }
 
         #region Некоторые методы для реализация самого алгоритма.

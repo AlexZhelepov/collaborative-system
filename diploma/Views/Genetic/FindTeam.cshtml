@@ -10,12 +10,13 @@
 
 @foreach (var team in Model.Teams)
 {
-    var list = team.Members.Select(i => new { employee = i.Employee.Id, vacancy = i.Vacancy.Id }).ToList();
-    var json = Newtonsoft.Json.JsonConvert.SerializeObject(new { projectId = Model.ProjectId, list});
-
-    <p>
-        @json    
-    </p>
+    var model = new GeneticSaveModel()
+    {
+        ProjectId = Model.ProjectId,
+        Employees = team.Members.Select(i => i.Employee.Id).ToArray(),
+        Vacancies = team.Members.Select(i => i.Vacancy.Id).ToArray()
+    };
+    var json = Newtonsoft.Json.JsonConvert.SerializeObject(model);
 
     <br />
     <div class="clickable" data-json="@(json)">
@@ -69,8 +70,6 @@
 
                     let json = $selected.data('json');
 
-                    console.log(json)
-
                     // Запускаем механизм закрепления исполнителей за проектом.
                     fetch('/Genetic/FindTeam', {
                         method: 'POST',
@@ -83,7 +82,7 @@
                         alert('Ошибка! Все из-за твоих кривых рук!')
                         console.log(err)
                     }).finally(() => {
-                        location.reload()
+                        window.location.replace("/Project/Details/" + "@Model.ProjectId"); // уходим на страничку проекта.
                     })
                 }
                 else {

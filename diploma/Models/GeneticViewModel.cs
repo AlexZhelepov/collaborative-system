@@ -34,6 +34,7 @@ namespace diploma.Models
         public int IterationsCount { get; set; }
     }
 
+    [Serializable]
     public class GeneticSaveModel
     {
         public int ProjectId { get; set; }
