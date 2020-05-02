@@ -24,6 +24,7 @@ namespace diploma.Controllers
                         join fi in db.FacetItems on d.ClassId equals fi.Id
                         into grp
                         from g in grp.DefaultIfEmpty()
+                        orderby d.Id
                         select new LearningViewModel() { Class = g, Doc = d }).ToList();
 
             return View(list);

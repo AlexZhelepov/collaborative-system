@@ -342,6 +342,20 @@ namespace diploma.Models
                 Rating += drawbackSkillLevelInvariance;
             }
 
+            // ==================================================================================
+            // ПУНКТ 4. Отпуск.
+            // TODO!
+            // ==================================================================================
+            /*var project = db.Projects.First(i => i.Id == Vacancy.ProjectId);
+
+            if (project.DateStart < Employee.VacationStart) 
+            {
+                if (project.DateEnd.HasValue && Employee.VacationStart < project.DateEnd) 
+                {
+                           
+                }
+            }*/
+
             // Округляем, чтобы красиво смотрелось (до 1000ых).
             Rating = Math.Round(Rating, 3);
         }
