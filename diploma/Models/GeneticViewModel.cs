@@ -48,19 +48,6 @@ namespace diploma.Models
         public List<Team> Teams { get; set; }
     }
 
-    public class Substitution
-    {
-        /// <summary>
-        /// Id-шник вакансии.
-        /// </summary>
-        public int VacancyId { get; set; }
-
-        /// <summary>
-        /// Была занята кем-то.
-        /// </summary>
-        public int OccupiedById { get; set; }
-    }
-
     /// <summary>
     /// Проектная команда.
     /// </summary>
