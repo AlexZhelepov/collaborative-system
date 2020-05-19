@@ -80,8 +80,8 @@ namespace diploma.Models
                 group v by v.UserInfoId into grp
                 select new { userId = grp.Key, count = grp.Count() }
             ).Where(i => i.count > 5)
-            .Select(i => i.userId)
-            .ToList();
+                .Select(i => i.userId)
+                .ToList();
 
             var employees = db.UserInfos.Where(i => !hasMoreThan5Projects.Contains(i.Id)).ToList();
 

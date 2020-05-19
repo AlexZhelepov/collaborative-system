@@ -521,10 +521,10 @@ namespace diploma.Controllers
                 }
 
                 // Убираем контрольные сроки (могут вылезти).
-                if (name.Contains("Контрольные сроки"))
+                if (info.Contains("Контрольные сроки"))
                 {
-                    int pos = name.IndexOf("Контрольные сроки");
-                    name = name.Substring(0, pos);
+                    int pos = info.IndexOf("Контрольные сроки");
+                    info = info.Substring(0, pos);
                 }
 
                 return new PersonalData() { Info = info, Name = name };
