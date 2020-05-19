@@ -2,10 +2,16 @@
 
 <h2>Обучающая выборка</h2>
 
+<a class="btn btn-sm btn-primary" asp-action="Create">Добавить файл</a>
+|
+<a class="btn btn-sm btn-primary" asp-controller="Learning" asp-action="UpdateMeaningInGroups">Подготовить обучающие выборки</a>
+<br />
+<br />
+
 <table class="table">
     <tr>
         <th>ID</th>
-        <th>Название</th>
+        <th>Файл</th>
         <th>Исполнитель</th>
         <th>Информация об исполнителе</th>
         <th>Класс</th>
@@ -16,7 +22,6 @@
         <tr>
             <td>@item.Doc.Id</td>
             <td>
-                @(System.IO.Path.GetFileName(item.Doc.FileName))
                 <a href="@("/" + item.Doc.FileName)">Скачать</a>
             </td>
             <td>@item.Doc.FIO</td>
@@ -44,4 +49,3 @@
     }
 </table>
 
-<a class="btn btn-sm btn-primary" asp-controller="Learning" asp-action="UpdateMeaningInGroups">Подготовить обучающие выборки</a>

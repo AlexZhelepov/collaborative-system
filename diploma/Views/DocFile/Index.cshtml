@@ -1,12 +1,20 @@
 ﻿@model IEnumerable<diploma.Data.Entities.DocFile>
+@{
+    bool show = (bool)ViewBag.Show;
+}
 
-<h2>Список загруженных файлов</h2>
+<h2>Таблица исполнителей</h2>
+
+<a class="btn btn-sm btn-primary" asp-action="Create">Добавить файл</a>
+|
+<a class="btn btn-sm btn-primary" asp-controller="Analysis" asp-action="AnalyzeTerms">Ранжировать термины</a>
+<br />
+<br />
 
 <table class="table">
     <tr>
-        <th>Пользователь</th>
+        <th>ID</th>
         <th>Скачать</th>
-        <th>Хеш файла</th>
         <th>Исполнитель</th>
         <th>Информация об исполнителе</th>
         <th colspan="2">Действия</th>
@@ -14,12 +22,15 @@
     @foreach (var item in Model)
     {
         <tr>
-            <td>@item.ApplicationUserId</td>
-            <td><a href="@("/" + item.FileName)">Скачать</a></td>
-            <td>@item.FileHash</td>
+            <td>@item.Id</td>
+            <td><a href="@("/" + item.FileName)">Файл</a></td>
             <td>@item.FIO</td>
-            <td>@item.Skills</td>
-            <td><a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@item.Id">Подробнее</a></td>
+            <td>
+                @item.Skills
+            </td>
+            <td>
+                <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@item.Id" asp-route-show="@(show)">@(show ? "Проанализировать" : "Подробнее")</a>
+            </td>
             <td>
                 <form asp-action="Delete" asp-route-id="@item.Id" method="post">
                     <button type="submit" class="btn btn-sm btn-danger">
@@ -31,6 +42,6 @@
     }
 </table>
 
-<a class="btn btn-sm btn-primary" asp-action="Create">Добавить файл</a>
+
 
 

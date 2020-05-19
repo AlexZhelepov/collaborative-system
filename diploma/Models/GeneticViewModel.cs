@@ -74,7 +74,16 @@ namespace diploma.Models
             var vacancies = db.Vacancies.Where(i => i.Project.Id == Project.Id).ToList();
 
             // Забираем всех мыслимых и немыслимых сотрудников (все только белыми, никакого черного бумера в карман или конверт).
-            var employees = db.UserInfos.ToList();
+            // Фильтруем рабов на предмет участия в 5 проектах, больше 5 не берем просто.
+            var hasMoreThan5Projects = (
+                from v in db.Vacancies
+                group v by v.UserInfoId into grp
+                select new { userId = grp.Key, count = grp.Count() }
+            ).Where(i => i.count > 5)
+            .Select(i => i.userId)
+            .ToList();
+
+            var employees = db.UserInfos.Where(i => !hasMoreThan5Projects.Contains(i.Id)).ToList();
 
             // Проверочка 1: рабов то не хватает! Нужно взять в плен еще =)
             if (vacancies.Count > employees.Count)
@@ -331,18 +340,38 @@ namespace diploma.Models
 
             // ==================================================================================
             // ПУНКТ 4. Отпуск.
-            // TODO!
+            // Человек хочет уйти в отпуск во время важного проекта, давайте накажем его, лишив зп!
             // ==================================================================================
-            /*var project = db.Projects.First(i => i.Id == Vacancy.ProjectId);
+            double beforeProject = -0.2f, withinProject = -0.5f, beforeEndOfProject = -0.8f;
 
-            if (project.DateStart < Employee.VacationStart) 
+            var project = db.Projects.First(i => i.Id == Vacancy.ProjectId);
+
+            // Если проект не имеет срока окончания, то пусть идет с миром в отпуск.
+            // А иначе нагнем подлеца!
+            if (project.DateEnd.HasValue) 
             {
-                if (project.DateEnd.HasValue && Employee.VacationStart < project.DateEnd) 
-                {
-                           
-                }
-            }*/
+                var vacationStart = Employee.VacationStart;
+                var vacationEnd = Employee.VacationStart.AddDays(14); // в качестве отпуска берем 2 недельки до 2.
 
+                // Если собирается в отпуск до начала проекта, но выходит, когда проект в самом разгаре.
+                if (project.DateStart > vacationStart && project.DateStart < vacationEnd) 
+                {
+                    Rating += beforeProject;
+                }
+
+                // Если собирается в отпуск, когда идет проект, выходит когда тоже идет проект.
+                if (project.DateStart < vacationStart && project.DateEnd > vacationEnd) 
+                {
+                    Rating += withinProject;
+                }
+
+                // Если уходит в отпуск, когда идет проект, но возвращается уже после проекта (прогулял защиту).
+                if (project.DateStart < vacationStart && project.DateEnd < vacationEnd && project.DateEnd > vacationStart) 
+                {
+                    Rating += beforeEndOfProject;
+                }
+            }
+            
             // Округляем, чтобы красиво смотрелось (до 1000ых).
             Rating = Math.Round(Rating, 3);
         }

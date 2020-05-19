@@ -39,5 +39,16 @@ namespace diploma.Models
         public int? ClassId { get; set; }
         public Dictionary<FacetItem, int> Result { get; set; }
         public List<SelectListItem> Choice { get; set; }
+        public string JsonClassification { get; set; }
+    }
+
+    /// <summary>
+    /// Результат классификации.
+    /// </summary>
+    [Serializable]
+    public class ClassificationResult 
+    {
+        public int Total { get; set; }
+        public Dictionary<string, double> Values { get; set; }
     }
 }

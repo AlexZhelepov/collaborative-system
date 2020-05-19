@@ -33,10 +33,14 @@ namespace diploma.Controllers
             _env = env;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(bool show)
         {
             using ApplicationDbContext db = AppContextFactory.DB;
-            var docs = db.DocFiles.ToList();
+            var docs = db.DocFiles.OrderBy(i => i.Id).ToList();
+
+            // Так никогда лучше не делать, но если только совсем хочется.
+            ViewBag.Show = show;
+            
             return View(docs);
         }
 
@@ -116,7 +120,7 @@ namespace diploma.Controllers
             return View(name);
         }
 
-        public IActionResult Details(int id)
+        public IActionResult Details(int id, bool show)
         {
             using var db = AppContextFactory.DB;
             var doc = db.DocFiles.First(i => i.Id == id);
@@ -131,6 +135,7 @@ namespace diploma.Controllers
                     from f in db.Facets
                     where new string[] { "skills", "subjects" }.Contains(f.Code)
                     join fi in db.FacetItems on f.Id equals fi.Facet.Id
+                    orderby fi.FacetId
                     select new SelectListItem() { Text = fi.Name, Value = fi.Id.ToString() }
                 );
 
@@ -143,7 +148,19 @@ namespace diploma.Controllers
                 model.Words.Add(new DocFileDetailsItem() { Word = item, Types = selectedList });
             }
 
-            model.Words = model.Words.OrderByDescending(i => i.Word.HasMeaning && i.Word.FacetItemId.HasValue).ToList();
+            // И снова не делайте так!
+            ViewBag.Show = show;
+
+            // Filter на фамилию и список компетенций. В особых случаях не работает.
+            string[] competences = (from fi in db.FacetItems
+                                    join f in db.Facets on fi.FacetId equals f.Id
+                                    where f.Code == "skills"
+                                    select fi.Name.ToLower()).ToArray();
+
+            model.Words = model.Words
+                .Where(i => !doc.FIO.ToLower().Contains(i.Word.InitialForm) && !competences.Contains(i.Word.InitialForm))
+                .OrderByDescending(i => i.Word.Frequency)
+                .ToList();
 
             return View(model);
         }
@@ -501,6 +518,13 @@ namespace diploma.Controllers
                 }
                 else if (splittedLine.Length > 1) {
                     info = splittedLine[1];
+                }
+
+                // Убираем контрольные сроки (могут вылезти).
+                if (name.Contains("Контрольные сроки"))
+                {
+                    int pos = name.IndexOf("Контрольные сроки");
+                    name = name.Substring(0, pos);
                 }
 
                 return new PersonalData() { Info = info, Name = name };

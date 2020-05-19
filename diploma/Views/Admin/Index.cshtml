@@ -1,6 +1,95 @@
-﻿<h1>Админка</h1>
+﻿<h2>Администрирование системы</h2>
+<div class="row">
+    <div class="col-md-9">
+        <p>
+            Администрирование ролей и назначение их пользователям
+        </p>
+    </div>
+    <div class="col-md-3">
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="Roles" asp-action="Index">Управления ролями</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-9">
+        <p>
+            Список пользователей системы, управление ими, информация о профилях
+        </p>
+    </div>
+    <div class="col-md-3">
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="User" asp-action="Index">Список пользователей системы</a>
+    </div>
+</div>
 
-<a class="btn btn-sm btn-primary" asp-controller="Project" asp-action="Index">Управление проектами</a>
-<a class="btn btn-sm btn-primary" asp-controller="User" asp-action="Index">Список рабов (пользователей)</a>
-<a class="btn btn-sm btn-primary" asp-controller="Roles" asp-action="Index">Управления ролями</a>
-<a class="btn btn-sm btn-primary" asp-controller="Ontology" asp-action="Index">Онтология</a>
+<hr />
+
+<h2>Управление знаниями</h2>
+<div class="row">
+    <div class="col-md-9">
+        <p>
+            Управление онтологическим аппаратом проекта
+        </p>
+    </div>
+    <div class="col-md-3">
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="Ontology" asp-action="Index">Онтология</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-9">
+        <p>
+            Управление документами и таблицей исполнителей
+        </p>
+    </div>
+    <div class="col-md-3">
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="DocFile" asp-action="Index">Таблица исполнителей</a>
+    </div>
+</div>
+
+<hr />
+
+<h2>Анализ документов</h2>
+<div class="row">
+    <div class="col-md-9">
+        <p>
+            Обучение классификатора в ручном режиме
+        </p>
+    </div>
+    <div class="col-md-3">
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="DocFile" asp-route-show="true" asp-action="Index">Подробнее</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-9">
+        <p>
+            Обучение классификатора в автоматизированном режиме
+        </p>
+    </div>
+    <div class="col-md-3">
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="Learning" asp-action="Index">Подробнее</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-9">
+        <p>
+            Сравнение классификаций
+        </p>
+    </div>
+    <div class="col-md-3">
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="Analysis" asp-route-show="false" asp-action="AnalysisList">Подробнее</a>
+    </div>
+</div>
+
+<hr />
+
+<h2>Управлением проектами</h2>
+<div class="row">
+    <div class="col-md-9">
+        <p>
+            Управление проектами, вакансиями и требованиями к ним.
+        </p>
+    </div>
+    <div class="col-md-3">
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="Project" asp-action="Index">Управление проектами</a>
+    </div>
+</div>

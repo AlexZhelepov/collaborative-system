@@ -50,7 +50,7 @@ namespace diploma.Controllers
 
             if (fi.Id != 0)
             {
-                model.Facets.FirstOrDefault(i => i.Value == fi.Id.ToString()).Selected = true;
+                model.Facets.FirstOrDefault(i => i.Value == fi.FacetId.ToString()).Selected = true;
                 model.FacetId = fi.FacetId;
                 model.ElementName = fi.Name;
             }
@@ -68,7 +68,7 @@ namespace diploma.Controllers
 
             if (db.FacetItems.Any(i => i.FacetId == model.FacetId && i.Name == model.ElementName)) 
             {
-                ModelState.AddModelError("Error", "Такой элемент уже есть! За Альянс!");
+                ModelState.AddModelError("Error", "Такой элемент уже есть!");
             }
 
             if (!ModelState.IsValid) 

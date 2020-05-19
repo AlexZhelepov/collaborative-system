@@ -1,35 +1,50 @@
 ﻿@model DocFileDetailsViewModel
-
-<h2>А из чего состоит файл?</h2>
+@{ 
+    bool show = (bool)ViewBag.Show;
+}
+<h2>Термины файла</h2>
 
 <form asp-action="UpdateWords" asp-route-id="@Model.Document.Id" method="post">
     <table class="table">
         <tr>
-            <th style="max-width:20px;">ТСД</th>
-            <th style="max-width:20px;">ТСК</th>
-            <th>Слово в тексте</th>
-            <th>Начальная форма</th>
-            <th>Принадлежность</th>
+            <th style="max-width:20px;">Термин <br/>(все)</th>
+            <th style="max-width:20px;">Термин <br/>(класс)</th>
+            <th>Термин</th>
+            <th>Частота встречаемости</th>
+            @if (show)
+            {
+                <th>Принадлежность</th>
+            }
         </tr>
 
         @foreach (var item in Model.Words)
         {
             <tr>
-                <td style="@(!item.Word.HasMeaning ? "border: 1px solid black; background-color: green; max-width: 20px" : "border: 1px solid black; background-color: red; max-width: 20px")"></td>
-                <td style="@(!item.Word.HasMeaningClass ? "border: 1px solid black; background-color: green; max-width: 20px" : "border: 1px solid black; background-color: red; max-width: 20px")"></td>
-                <td>@item.Word.TextVersion</td>
-                <td>@item.Word.InitialForm</td>
-                <td>
-                    <!--Данные для формочки-->
-                    <input class="data-word-id" value="@item.Word.Id" type="hidden">
-                    <select class="data-select-list" asp-for="@item.Type" asp-items="@item.Types"></select>
+                <td style="@(item.Word.HasMeaning ? "border: 1px solid black; background-color: green" : "border: 1px solid black; background-color: red;")">
+                    @(item.Word.HasMeaning ? "Да" : "Нет")
                 </td>
+                <td style="@(item.Word.HasMeaningClass ? "border: 1px solid black; background-color: green;" : "border: 1px solid black; background-color: red;")">
+                    @(item.Word.HasMeaningClass ? "Да" : "Нет")
+                </td>
+                <td>@item.Word.InitialForm</td>
+                <td>@item.Word.Frequency</td>
+                @if (show)
+                {
+                    <td>
+                        <!--Данные для формочки-->
+                        <input class="data-word-id" value="@item.Word.Id" type="hidden">
+                        <select class="data-select-list" asp-for="@item.Type" asp-items="@item.Types"></select>
+                    </td>
+                }
             </tr>
         }
     </table>
-    <button id="save-btn" type="submit" class="btn btn-sm btn-primary">
-        Сохранить
-    </button>
+    @if (show)
+    {
+        <button id="save-btn" type="submit" class="btn btn-sm btn-primary">
+            Сохранить
+        </button>
+    }
 </form>
 
 @section Scripts {

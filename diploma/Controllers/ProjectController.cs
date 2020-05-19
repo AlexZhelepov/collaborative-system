@@ -361,10 +361,16 @@ namespace diploma.Controllers
 
             await TryUpdateModelAsync<VacancyCompetence>(model, "Competence", i => i.CompetenceId, i => i.LevelId, i => i.VacancyId);
 
+            // Проверка, что никакие данные не ввели.
+            if (model.CompetenceId == 0 || model.LevelId == 0) 
+            {
+                ModelState.AddModelError("Error1", "Не выбрана компетенция или уровень!");
+            }
+
             // Проверка если такая компетенция уже есть у вакансии.
             if (db.VacancyCompetences.Any(i => i.VacancyId == model.VacancyId && i.CompetenceId == model.CompetenceId))
             {
-                ModelState.AddModelError("Error", "К данной вакансии уже прикреплено данное умение. Жизнь за Нер'Зула!");
+                ModelState.AddModelError("Error2", "К данной вакансии уже прикреплено данное умение.");
             }
 
             if (!ModelState.IsValid)
@@ -372,8 +378,8 @@ namespace diploma.Controllers
                 return View(new VacancyCompetenceEditViewModel()
                 {
                     Competence = model,
-                    Competences = DataHelper.CreateSelectListItem(db, model.CompetenceId, "skills", "subjects"),
-                    Levels = DataHelper.CreateSelectListItem(db, model.LevelId, "levels")
+                    Competences = DataHelper.CreateSelectListItem(db, model.CompetenceId == 0 ? (int?) null : model.CompetenceId, "skills", "subjects"),
+                    Levels = DataHelper.CreateSelectListItem(db, model.LevelId == 0 ? (int?) null : model.LevelId, "levels")
                 });
             }
 

@@ -39,6 +39,12 @@ namespace diploma.Data.Entities
         public string WorkPlace { get; set; }
 
         /// <summary>
+        /// Результат автоматической классификации.
+        /// </summary
+        [Column(TypeName = "jsonb")]
+        public string JsonAutoClassificationResult { get; set; }
+
+        /// <summary>
         /// Отношение к предметной области, к классу.
         /// </summary>
         [ForeignKey("FacetItem")]

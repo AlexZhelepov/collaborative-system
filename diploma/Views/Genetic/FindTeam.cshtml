@@ -65,8 +65,7 @@
                 let $selected = $('.selected');
 
                 if ($selected && $selected.length == 1) {
-                    alert('Выбор сделан! А тебе уже есть 18?)')
-                    alert('Точно?')
+                    alert('Выбор сделан! Продолжить?)')
 
                     let json = $selected.data('json');
 
@@ -86,7 +85,7 @@
                     })
                 }
                 else {
-                    alert('Сделай свой выбор! Не бойся, не упадет, наверное...');
+                    alert('Сделай свой выбор!');
                 }
             });
         });

@@ -18,7 +18,7 @@ namespace diploma.Controllers
         public IActionResult AnalysisList()
         {
             using var db = AppContextFactory.DB;
-            var docs = db.DocFiles.ToList();
+            var docs = db.DocFiles.OrderBy(i => i.Id).ToList();
 
             // Классы.
             var subjects = (
@@ -44,7 +44,6 @@ namespace diploma.Controllers
 
             return View(list);
         }
-
 
         /// <summary>
         /// Значимость терминов, прогоняется по всем загруженным текстам.
@@ -113,10 +112,10 @@ namespace diploma.Controllers
             {
                 await t.RollbackAsync();
                 ModelState.AddModelError("Error", "Возникла ошибка при обновлении значимости терминов в файлах! " + ex.Message);
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "DocFile");
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "DocFile");
         }
     }
 

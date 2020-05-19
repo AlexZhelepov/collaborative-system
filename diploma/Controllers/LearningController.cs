@@ -8,6 +8,7 @@ using diploma.Data.Entities;
 using diploma.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
 
 namespace diploma.Controllers
 {
@@ -247,7 +248,7 @@ namespace diploma.Controllers
                              join fi in db.FacetItems on r.Key equals fi.Id
                              select new SelectListItem()
                              {
-                                 Text = $"{fi.Name} – {r.Value} (пересечение терминов)",
+                                 Text = $"{fi.Name} – {r.Value}",
                                  Value = fi.Id.ToString()
                              }).ToList();
             
@@ -257,6 +258,17 @@ namespace diploma.Controllers
             model.Result = (from r in result
                             join fi in db.FacetItems on r.Key equals fi.Id
                             select new { fi, r.Value }).ToDictionary(i => i.fi, i => i.Value);
+
+            // Сохранение в json результатов классификации, чтобы потом переложить их в БД.
+            var s = result.Sum(i => i.Value);
+            var res = new ClassificationResult()
+            {
+                Total = s,
+                Values = (from r in result
+                          join fi in db.FacetItems on r.Key equals fi.Id
+                          select new { key = fi.Name, value = Math.Round((double) r.Value / s * 100, 2) }).ToDictionary(i => i.key, i => i.value)
+            };
+            model.JsonClassification = JsonConvert.SerializeObject(res);
 
             return View("Result", model);
         }
@@ -273,13 +285,14 @@ namespace diploma.Controllers
             }
 
             LearningResultViewModel model = new LearningResultViewModel();
-            await TryUpdateModelAsync(model, "", i => i.ClassId);
+            await TryUpdateModelAsync(model, "", i => i.ClassId, i => i.JsonClassification);
 
             try
             {
                 if (model.ClassId.HasValue) 
                 {
                     doc.ClassId = model.ClassId;
+                    doc.JsonAutoClassificationResult = model.JsonClassification;
                     await db.SaveChangesAsync();
                 }
             }
