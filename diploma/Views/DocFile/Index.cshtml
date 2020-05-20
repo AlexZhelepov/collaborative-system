@@ -1,9 +1,10 @@
 ﻿@model IEnumerable<diploma.Data.Entities.DocFile>
 @{
     bool show = (bool)ViewBag.Show;
+    bool showClass = (bool)ViewBag.ShowClass;
 }
 
-<h2>Таблица исполнителей</h2>
+<h2>Таблица документов</h2>
 
 <a class="btn btn-sm btn-primary" asp-action="Create">Добавить файл</a>
 |
@@ -29,7 +30,7 @@
                 @item.Skills
             </td>
             <td>
-                <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@item.Id" asp-route-show="@(show)">@(show ? "Проанализировать" : "Подробнее")</a>
+                <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@item.Id" asp-route-showclass="@(showClass)" asp-route-show="@(show)">@(show ? "Проанализировать" : "Подробнее")</a>
             </td>
             <td>
                 <form asp-action="Delete" asp-route-id="@item.Id" method="post">

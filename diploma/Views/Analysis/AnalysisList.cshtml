@@ -20,7 +20,7 @@
             <td>@item.Document.FIO</td>
             <td>@item.Document.Skills</td>
             <td>
-                @foreach (var subject in item.SubjectsAccessory)
+                @foreach (var subject in item.SubjectsAccessory.ToList().OrderByDescending(n => n.Value))
                 {
                     <p>@subject.Key — @subject.Value%</p>
                 }
@@ -38,14 +38,14 @@
                 @if (!string.IsNullOrEmpty(item.Document.JsonAutoClassificationResult))
                 {
                     var data = Newtonsoft.Json.JsonConvert.DeserializeObject<ClassificationResult>(item.Document.JsonAutoClassificationResult);
-                    @foreach (var i in data.Values)
+                    @foreach (var i in data.Values.ToList().OrderByDescending(n => n.Value))
                     {
                         <p>@i.Key – @i.Value%</p>
                     }
                 }
                 else 
                 {
-                    <a class="btn btn-sm btn-primary" asp-controller="Learning" asp-action="Index">Классифицировать</a>
+                    <a class="btn btn-sm btn-primary" asp-controller="Learning" asp-action="DefineClass" asp-route-id="@item.Document.Id">Классифицировать</a>
                 }
             </td>
             <td>

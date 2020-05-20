@@ -33,13 +33,14 @@ namespace diploma.Controllers
             _env = env;
         }
 
-        public IActionResult Index(bool show)
+        public IActionResult Index(bool show, bool showClass)
         {
             using ApplicationDbContext db = AppContextFactory.DB;
             var docs = db.DocFiles.OrderBy(i => i.Id).ToList();
 
             // Так никогда лучше не делать, но если только совсем хочется.
             ViewBag.Show = show;
+            ViewBag.ShowClass = showClass;
             
             return View(docs);
         }
@@ -120,13 +121,20 @@ namespace diploma.Controllers
             return View(name);
         }
 
-        public IActionResult Details(int id, bool show)
+        public IActionResult Details(int id, bool show, bool showClass)
         {
             using var db = AppContextFactory.DB;
             var doc = db.DocFiles.First(i => i.Id == id);
             var words = db.Words.Where(i => i.DocFileId == id).ToList();
 
             var model = new DocFileDetailsViewModel() { Document = doc, Words = new List<DocFileDetailsItem>() };
+
+            // Найти слово соответствие.
+            var proposedWordIds = (from w in db.Words
+                              where w.FacetItemId.HasValue && w.DocFileId != doc.Id
+                              join w2 in db.Words on w.InitialForm equals w2.InitialForm
+                              where w2.DocFileId == doc.Id
+                              select new { word = w2.InitialForm, proposedFacetItemId = w.FacetItemId }).ToList();
 
             foreach (var item in words)
             {
@@ -144,12 +152,24 @@ namespace diploma.Controllers
                     var val = item.FacetItemId.Value.ToString();
                     selectedList.First(i => i.Value == val).Selected = true;
                 }
+                else 
+                {
+                    // Ищем слово среди списка.
+                    var proposedWord = proposedWordIds.FirstOrDefault(i => i.word == item.InitialForm);
+                    if (proposedWord != null) 
+                    {
+                        string val = proposedWord.proposedFacetItemId.Value.ToString();
+                        selectedList.First(i => i.Value == val).Selected = true;
+                    }
+                }
 
                 model.Words.Add(new DocFileDetailsItem() { Word = item, Types = selectedList });
             }
 
             // И снова не делайте так!
             ViewBag.Show = show;
+            ViewBag.ClassName = doc.ClassId.HasValue ? db.FacetItems.First(i => i.Id == doc.ClassId).Name : "-";
+            ViewBag.ShowClass = showClass;
 
             // Filter на фамилию и список компетенций. В особых случаях не работает.
             string[] competences = (from fi in db.FacetItems

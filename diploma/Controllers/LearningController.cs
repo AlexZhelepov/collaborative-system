@@ -121,8 +121,6 @@ namespace diploma.Controllers
             // Бежим в отрыжку, то есть врипрыжку по категориям (или классам).
             foreach (int cat in categories)
             {
-                using var t = db.Database.BeginTransaction();
-
                 try
                 {
                     // Считаем количество документов категории. Я не виноват(а), что так криво - он(а) сам(а) пришел(ла) =)
@@ -169,18 +167,16 @@ namespace diploma.Controllers
                             }
                         }
 
-                        if (portion % 20 == 0)
+                        if (portion % 20 == 0 && portion != 0)
                         {
                             db.SaveChanges();
                         }
                     }
 
                     db.SaveChanges();
-                    await t.CommitAsync();
                 }
                 catch (Exception ex)
                 {
-                    await t.RollbackAsync();
                     ModelState.AddModelError("Error", "Возникла ошибка при обновлении значимости терминов в группах файлов! " + ex.Message);
                     return RedirectToAction("Index");
                 }

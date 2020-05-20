@@ -36,11 +36,11 @@
 <div class="row">
     <div class="col-md-9">
         <p>
-            Управление документами и таблицей исполнителей
+            Управление документами
         </p>
     </div>
     <div class="col-md-3">
-        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="DocFile" asp-action="Index">Таблица исполнителей</a>
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="DocFile" asp-route-showclass="true" asp-route-show="false" asp-action="Index">Таблица документов</a>
     </div>
 </div>
 
@@ -54,7 +54,7 @@
         </p>
     </div>
     <div class="col-md-3">
-        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="DocFile" asp-route-show="true" asp-action="Index">Подробнее</a>
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="DocFile" asp-route-showclass="false" asp-route-show="true" asp-action="Index">Подробнее</a>
     </div>
 </div>
 
@@ -65,14 +65,14 @@
         </p>
     </div>
     <div class="col-md-3">
-        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="Learning" asp-action="Index">Подробнее</a>
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="Learning" asp-route-showclass="true" asp-route-show="false" asp-action="Index">Подробнее</a>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-9">
         <p>
-            Сравнение классификаций
+            Классификатор пользователей
         </p>
     </div>
     <div class="col-md-3">

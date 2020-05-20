@@ -1,14 +1,18 @@
 ﻿@model DocFileDetailsViewModel
 @{ 
     bool show = (bool)ViewBag.Show;
+    bool showClass = (bool)ViewBag.ShowClass;
 }
 <h2>Термины файла</h2>
 
 <form asp-action="UpdateWords" asp-route-id="@Model.Document.Id" method="post">
     <table class="table">
         <tr>
-            <th style="max-width:20px;">Термин <br/>(все)</th>
-            <th style="max-width:20px;">Термин <br/>(класс)</th>
+            <th style="max-width:80px;">Не входит во все<br/> документы</th>
+            @if (showClass)
+            {
+                <th style="max-width:80px;">Термин входит в класс<br/>@ViewBag.ClassName</th>
+            }
             <th>Термин</th>
             <th>Частота встречаемости</th>
             @if (show)
@@ -20,12 +24,15 @@
         @foreach (var item in Model.Words)
         {
             <tr>
-                <td style="@(item.Word.HasMeaning ? "border: 1px solid black; background-color: green" : "border: 1px solid black; background-color: red;")">
+                <td style="@(item.Word.HasMeaning ? "border: 1px solid black; background-color: green; text-align: center" : "border: 1px solid black; background-color: red;; text-align: center")">
                     @(item.Word.HasMeaning ? "Да" : "Нет")
                 </td>
-                <td style="@(item.Word.HasMeaningClass ? "border: 1px solid black; background-color: green;" : "border: 1px solid black; background-color: red;")">
-                    @(item.Word.HasMeaningClass ? "Да" : "Нет")
-                </td>
+                @if (showClass)
+                {
+                    <td style="@(item.Word.HasMeaningClass ? "border: 1px solid black; background-color: green; text-align: center" : "border: 1px solid black; background-color: red; ; text-align: center")">
+                        @(item.Word.HasMeaningClass ? "Да" : "Нет")
+                    </td>
+                }
                 <td>@item.Word.InitialForm</td>
                 <td>@item.Word.Frequency</td>
                 @if (show)
