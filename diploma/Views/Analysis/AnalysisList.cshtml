@@ -1,59 +1,102 @@
-﻿@model IEnumerable<AnalysisViewModel>
+﻿@model AnalysisViewModel
+@{
+    string type = ViewBag.Type;
+}
 
-<h2>Анализ документов</h2>
+@if (type == "docs" || string.IsNullOrEmpty(type))
+{
+    <h2>Анализ документов</h2>
 
-<table class="table">
-    <tr>
-        <th>ID</th>
-        <th>Документ</th>
-        <th>Исполнитель</th>
-        <th>Должность</th>
-        <th>Ручная классификация</th>
-        <th>Автоматическая классификация</th>
-        <th>Компетенции</th>
-    </tr>
-    @foreach (var item in Model)
-    {
+    <table class="table">
         <tr>
-            <td>@item.Document.Id</td>
-            <td><a href="@("/" + item.Document.FileName)">Скачать</a></td>
-            <td>@item.Document.FIO</td>
-            <td>@item.Document.Skills</td>
-            <td>
-                @foreach (var subject in item.SubjectsAccessory.ToList().OrderByDescending(n => n.Value))
-                {
-                    <p>@subject.Key — @subject.Value%</p>
-                }
+            <th>ID</th>
+            <th>Документ</th>
+            <th>Исполнитель</th>
+            <th>Должность</th>
+            <th>Ручная классификация</th>
+            <th>Автоматическая классификация</th>
+            <th>Компетенции</th>
+        </tr>
+        @foreach (var item in Model.DocsAnalysis)
+        {
+            <tr>
+                <td>@item.Document.Id</td>
+                <td><a href="@("/" + item.Document.FileName)">Скачать</a></td>
+                <td>@item.Document.FIO</td>
+                <td>@item.Document.Skills</td>
+                <td>
+                    @foreach (var subject in item.SubjectsAccessory.ToList().OrderByDescending(n => n.Percent))
+                    {
+                        <p>@subject.Name — @subject.Percent%</p>
+                    }
 
-                @if (item.SubjectsAccessory.Count > 0)
-                {
-                    <a class="btn btn-sm btn-primary" asp-action="Details" asp-controller="DocFile" asp-route-id="@item.Document.Id" asp-route-show="true">Обновить классификацию</a>
-                }
-                else
-                {
-                    <a class="btn btn-sm btn-primary" asp-action="Details" asp-controller="DocFile" asp-route-id="@item.Document.Id" asp-route-show="true">Добавить классификацию</a>
-                }
-            </td>
-            <td>
-                @if (!string.IsNullOrEmpty(item.Document.JsonAutoClassificationResult))
-                {
-                    var data = Newtonsoft.Json.JsonConvert.DeserializeObject<ClassificationResult>(item.Document.JsonAutoClassificationResult);
-                    @foreach (var i in data.Values.ToList().OrderByDescending(n => n.Value))
+                    @if (item.SubjectsAccessory.Count > 0)
+                    {
+                        <a class="btn btn-sm btn-primary" asp-action="Details" asp-controller="DocFile" asp-route-id="@item.Document.Id" asp-route-show="true">Обновить классификацию</a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-sm btn-primary" asp-action="Details" asp-controller="DocFile" asp-route-id="@item.Document.Id" asp-route-show="true">Добавить классификацию</a>
+                    }
+                </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.Document.JsonAutoClassificationResult))
+                    {
+                        var data = Newtonsoft.Json.JsonConvert.DeserializeObject<ClassificationResult>(item.Document.JsonAutoClassificationResult);
+                        @foreach (var i in data.Values.ToList().OrderByDescending(n => n.Value))
+                        {
+                            <p>@i.Key – @i.Value%</p>
+                        }
+                    }
+                    else
+                    {
+                        <a class="btn btn-sm btn-primary" asp-controller="Learning" asp-action="DefineClass" asp-route-id="@item.Document.Id">Классифицировать</a>
+                    }
+                </td>
+                <td>
+                    @foreach (var skill in item.Skills)
+                    {
+                        <p>@skill</p>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}
+
+@if (type == "users")
+{
+    <h2>Анализ исполнителей</h2>
+    <table class="table">
+        <tr>
+            <th>Участник проектов</th>
+            <th>Ручная классификация</th>
+            <th>Автоматическая классификация</th>
+            <th>Компетенции</th>
+        </tr>
+        @foreach (var item in Model.UsersAnalysis)
+        {
+            <tr>
+                <td>@item.Key</td>
+                <td>
+                    @foreach (var i in item.Value.ManualClassification)
                     {
                         <p>@i.Key – @i.Value%</p>
                     }
-                }
-                else 
-                {
-                    <a class="btn btn-sm btn-primary" asp-controller="Learning" asp-action="DefineClass" asp-route-id="@item.Document.Id">Классифицировать</a>
-                }
-            </td>
-            <td>
-                @foreach (var skill in item.Skills)
-                {
-                    <p>@skill</p>
-                }
-            </td>
-        </tr>
-    }
-</table>
+                </td>
+                <td>
+                    @foreach (var i in item.Value.AutoClassification)
+                    {
+                        <p>@i.Key – @i.Value%</p>
+                    }
+                </td>
+                <td>
+                    @foreach (var skill in item.Value.Skills)
+                    {
+                        <p>@skill</p>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}

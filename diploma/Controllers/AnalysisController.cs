@@ -7,6 +7,8 @@ using diploma.Data.Entities;
 using diploma.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Newtonsoft.Json;
 
 namespace diploma.Controllers
 {
@@ -15,7 +17,12 @@ namespace diploma.Controllers
     {
         public IActionResult Index() => View();
 
-        public IActionResult AnalysisList()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type">docs или users, чтобы не заморачиваться с интерфейсом</param>
+        /// <returns></returns>
+        public IActionResult AnalysisList(string type)
         {
             using var db = AppContextFactory.DB;
             var docs = db.DocFiles.OrderBy(i => i.Id).ToList();
@@ -36,13 +43,101 @@ namespace diploma.Controllers
                 select fi
             ).ToList();
 
-            var list = new List<AnalysisViewModel>();
+            var list = new List<AnalysisItemViewModel>();
             docs.ForEach(i =>
             {
                 list.Add(AnalysisHelper.CalcDocStats(db, i, subjects, skills));
             });
 
-            return View(list);
+            // Сводная по исполнителям (допилено, поэтому криво написано).
+            var usersInfo = list.Select(i => new
+            {
+                fio = i.Document.FIO,
+                skills = i.Skills,
+                autoDefined = !string.IsNullOrEmpty(i.Document.JsonAutoClassificationResult) ? JsonConvert.DeserializeObject<ClassificationResult>(i.Document.JsonAutoClassificationResult) : null,
+                manuallyDefined = i.SubjectsAccessory
+            }).ToList();
+
+            // Обрабатываем информацию о пользователях, преобразуя все к виду таблицы.
+            var userSummary = new Dictionary<string, UserSummary>();
+            var tmpSummary = new Dictionary<string, UserSummaryData>();
+
+            // Подготовка данных.
+            foreach (var item in usersInfo) 
+            {
+                if (!tmpSummary.ContainsKey(item.fio)) 
+                {
+                    tmpSummary.Add(item.fio, new UserSummaryData());
+                }
+
+                tmpSummary[item.fio].Skills.AddRange(item.skills);
+
+                // Автоклассификация.
+                if (item.autoDefined != null) 
+                {
+                    foreach (var adi in item.autoDefined.Values) 
+                    {
+                        if (!tmpSummary[item.fio].AutoClassification.ContainsKey(adi.Key)) 
+                        {
+                            tmpSummary[item.fio].AutoClassification.Add(adi.Key, 0);
+                        }
+
+                        tmpSummary[item.fio].AutoClassification[adi.Key] += (int)(adi.Value / 100 * item.autoDefined.Total); // немного интересно, но школьные знания о процентацах никто не отменял. Спасибо моему 5ти классному Учителю за это!
+                    }
+                }
+
+                if (item.manuallyDefined != null)
+                {
+                    foreach (var md in item.manuallyDefined) 
+                    {
+                        if (!tmpSummary[item.fio].ManualClassification.ContainsKey(md.Name)) 
+                        {
+                            tmpSummary[item.fio].ManualClassification.Add(md.Name, 0);
+                        }
+
+                        tmpSummary[item.fio].ManualClassification[md.Name] += md.Count;
+                    }
+                }
+            }
+
+            // А теперь доводим все данные до продакшена.
+            foreach (var user in tmpSummary) 
+            {
+                // Добавили пользователя.
+                userSummary.Add(user.Key, new UserSummary());
+
+                // Сделали distinct по его все умениям.
+                if (user.Value.Skills != null && user.Value.Skills.Any())
+                {
+                    userSummary[user.Key].Skills = user.Value.Skills.Distinct().ToList();
+                }
+
+                // Сгруппировали и посчитали проценты по всем его предметным областям (автоматическая выборка).
+                if (user.Value.AutoClassification != null && user.Value.AutoClassification.Any())
+                {
+                    int totalCount = user.Value.AutoClassification.Sum(i => i.Value);
+                    userSummary[user.Key].AutoClassification = user.Value.AutoClassification.ToDictionary(i => i.Key, i => Math.Round((double)i.Value / totalCount * 100, 2));
+                }
+
+                // Сгруппировали и посчитали проценты по всем его предметным областям (ручная выборка).
+                if (user.Value.ManualClassification != null && user.Value.ManualClassification.Any())
+                {
+                    int totalCount = user.Value.ManualClassification.Sum(i => i.Value);
+                    userSummary[user.Key].ManualClassification = user.Value.ManualClassification.ToDictionary(i => i.Key, i => Math.Round((double)i.Value / totalCount * 100, 2));
+
+                }
+            }
+
+            var model = new AnalysisViewModel()
+            {
+                DocsAnalysis = list,
+                UsersAnalysis = userSummary
+            };
+
+            // Опять так лучше не делать!
+            ViewBag.Type = type;
+
+            return View(model);
         }
 
         /// <summary>
@@ -121,13 +216,13 @@ namespace diploma.Controllers
 
     public static class AnalysisHelper
     {
-        public static AnalysisViewModel CalcDocStats(ApplicationDbContext db, DocFile document, List<FacetItem> subjects, List<FacetItem> skills)
+        public static AnalysisItemViewModel CalcDocStats(ApplicationDbContext db, DocFile document, List<FacetItem> subjects, List<FacetItem> skills)
         {
             // Слова текста имеющие какое-то значение.
             var words = db.Words.Where(i => i.FacetItemId.HasValue && i.DocFileId == document.Id).ToList();
 
             // Данные на выход.
-            Dictionary<string, double> subjectsAccessory = new Dictionary<string, double>();
+            List<SubjectStats> subjectsAccessory = new List<SubjectStats>();
             List<string> personalSkills = new List<string>();
 
             var groupedTerms = (from w in words
@@ -137,14 +232,21 @@ namespace diploma.Controllers
 
             var sum = groupedTerms.Sum(i => i.count);
 
-            subjectsAccessory = groupedTerms.ToDictionary(i => i.name, i => Math.Round(((double)i.count / sum) * 100, 2));
+            subjectsAccessory = groupedTerms.Select(i => new SubjectStats()
+            {
+                Name = i.name,
+                Count = i.count,
+                TotalSum = sum,
+                Percent = Math.Round(((double)i.count / sum) * 100, 2)
+            }).ToList();
+
             personalSkills = (
                 from w in words
                 join fi in skills on w.FacetItemId equals fi.Id
                 select fi.Name
             ).Distinct().ToList();
 
-            return new AnalysisViewModel() { SubjectsAccessory = subjectsAccessory, Document = document, Skills = personalSkills };
+            return new AnalysisItemViewModel() { SubjectsAccessory = subjectsAccessory, Document = document, Skills = personalSkills };
         }
     }
 }

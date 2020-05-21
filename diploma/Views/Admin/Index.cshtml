@@ -72,11 +72,22 @@
 <div class="row">
     <div class="col-md-9">
         <p>
-            Классификатор пользователей
+            Классификатор документов
         </p>
     </div>
     <div class="col-md-3">
-        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="Analysis" asp-route-show="false" asp-action="AnalysisList">Подробнее</a>
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="Analysis" asp-route-show="false" asp-route-type="docs" asp-action="AnalysisList">Подробнее</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-9">
+        <p>
+            Классификатор сотрудников
+        </p>
+    </div>
+    <div class="col-md-3">
+        <a class="btn btn-sm btn-primary btn-width-100" asp-controller="Analysis" asp-route-show="false" asp-route-type="users" asp-action="AnalysisList">Подробнее</a>
     </div>
 </div>
 
