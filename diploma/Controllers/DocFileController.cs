@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.Internal;
 using Newtonsoft.Json;
+using NuGet.Frameworks;
 using Spire.Doc;
 using System;
 using System.Collections.Generic;
@@ -136,6 +137,12 @@ namespace diploma.Controllers
                               where w2.DocFileId == doc.Id
                               select new { word = w2.InitialForm, proposedFacetItemId = w.FacetItemId }).ToList();
 
+            // Компетенции (если тоже совпадает, то ставим).
+            var competences = (from fi in db.FacetItems
+                               join f in db.Facets on fi.FacetId equals f.Id
+                               where f.Code == "skills"
+                               select fi).ToList();
+
             foreach (var item in words)
             {
                 var selectedList = new List<SelectListItem>() { new SelectListItem() { Value = "0", Text = "[Выберите отношение]" } };
@@ -152,13 +159,22 @@ namespace diploma.Controllers
                     var val = item.FacetItemId.Value.ToString();
                     selectedList.First(i => i.Value == val).Selected = true;
                 }
-                else 
+                else if (proposedWordIds.Any(i => i.word == item.InitialForm))
                 {
-                    // Ищем слово среди списка.
                     var proposedWord = proposedWordIds.FirstOrDefault(i => i.word == item.InitialForm);
-                    if (proposedWord != null) 
+                    if (proposedWord != null)
                     {
                         string val = proposedWord.proposedFacetItemId.Value.ToString();
+                        selectedList.First(i => i.Value == val).Selected = true;
+                    }
+                }
+                else if (competences.Any(i => i.Name.ToLower() == item.InitialForm.ToLower()))
+                {
+                    // Проверяем, соответствует ли слово компетенции (если да, то проставляем).
+                    var competence = competences.FirstOrDefault(i => i.Name.ToLower() == item.InitialForm.ToLower());
+                    if (competence != null)
+                    {
+                        string val = competence.Id.ToString();
                         selectedList.First(i => i.Value == val).Selected = true;
                     }
                 }
@@ -171,14 +187,9 @@ namespace diploma.Controllers
             ViewBag.ClassName = doc.ClassId.HasValue ? db.FacetItems.First(i => i.Id == doc.ClassId).Name : "-";
             ViewBag.ShowClass = showClass;
 
-            // Filter на фамилию и список компетенций. В особых случаях не работает.
-            string[] competences = (from fi in db.FacetItems
-                                    join f in db.Facets on fi.FacetId equals f.Id
-                                    where f.Code == "skills"
-                                    select fi.Name.ToLower()).ToArray();
-
+            // Filter на фамилию. В особых случаях не работает.
             model.Words = model.Words
-                .Where(i => !doc.FIO.ToLower().Contains(i.Word.InitialForm) && !competences.Contains(i.Word.InitialForm))
+                .Where(i => !doc.FIO.ToLower().Contains(i.Word.InitialForm))
                 .OrderByDescending(i => i.Word.Frequency)
                 .ToList();
 
